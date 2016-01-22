@@ -12,6 +12,13 @@ local liluat = {
 	private = {} --used to expose private functions for testing
 }
 
+-- escape a string for use in lua patterns
+-- (this simply prepends all non alphanumeric characters with '%'
+local function escape_pattern(text)
+	return text:gsub("([^%w])", "%%%1" --[[function (match) return "%"..match end--]])
+end
+liluat.private.escape_pattern = escape_pattern
+
 -- a tree fold on inclusion tree
 -- @param init_func: must return a new value when called
 local function include_fold(template, start_tag, end_tag, fold_func, init_func)
