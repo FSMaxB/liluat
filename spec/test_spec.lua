@@ -165,6 +165,15 @@ some more text]]
 		assert.equal(expected, file_content)
 	end)
 
+	describe("parse_string_literal", function()
+		it("should properly resolve escape sequences", function ()
+			local expected = "bl\"\'\\ub" .. "\n\t\r" .. "bla"
+			local input = "\"bl\\\"\\\'\\\\ub\" .. \"\\n\\t\\r\" .. \"bla\""
+
+			assert.equal(expected, liluat.private.parse_string_literal(input))
+		end)
+	end)
+
 	describe("sandbox", function ()
 		it("should run code in a sandbox", function ()
 			local code = "return i, 1"

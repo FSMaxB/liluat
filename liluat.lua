@@ -146,6 +146,11 @@ local function sandbox(code, name, environment, whitelist)
 end
 liluat.private.sandbox = sandbox
 
+local function parse_string_literal(string_literal)
+	return sandbox('return' .. string_literal, nil, nil, {})()
+end
+liluat.private.parse_string_literal = parse_string_literal
+
 -- a tree fold on inclusion tree
 -- @param init_func: must return a new value when called
 local function include_fold(template, start_tag, end_tag, fold_func, init_func)
