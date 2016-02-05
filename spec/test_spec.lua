@@ -174,6 +174,71 @@ some more text]]
 		end)
 	end)
 
+	describe("liluat.lex", function ()
+		it("should create a list of chunks", function ()
+			local template = [[
+#{= expression}# bla #{code}#
+ #{other code}# some text
+#{more code}##{}#
+some more text]]
+
+			local expected_output = {
+				"#{= expression}#",
+				" bla ",
+				"#{code}#",
+				"\n ",
+				"#{other code}#",
+				" some text\n",
+				"#{more code}#",
+				"#{}#",
+				"\nsome more text"
+			}
+
+			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
+		end)
+
+		it("should include files", function ()
+			local template = [[
+first line
+#{include: "spec/read_entire_file-test"}#
+another line]]
+
+			local expected_output = {
+				"first line\n",
+				"This should be read by the 'read_entire_file' helper functions.\n",
+				"\nanother line"
+			}
+
+			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
+		end)
+
+		it("should work with other start and end tags", function ()
+			local template = "text {%--template%} more text"
+			local expected_output = {
+				"text ",
+				"{%--template%}",
+				" more text"
+			}
+
+			assert.same(expected_output, liluat.lex(template, "{%", "%}"))
+		end)
+
+		it("should use existing table if specified", function ()
+			local template = "bla {{= 5}} more bla"
+			local output = {}
+			local expected_output = {
+				"bla ",
+				"{{= 5}}",
+				" more bla"
+			}
+
+			local result = liluat.lex(template, "{{", "}}", output)
+
+			assert.equal(output, result)
+			assert.same(expected_output, result)
+		end)
+	end)
+
 	describe("sandbox", function ()
 		it("should run code in a sandbox", function ()
 			local code = "return i, 1"
