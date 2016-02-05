@@ -297,13 +297,8 @@ function liluat.loadstring(template, template_name, options)
 end
 
 -- @return { name = string, code = string / function }
-function liluat.loadfile(filename, start_tag, end_tag)
-	local file_content = read_entire_file(filename)
-	local options = {
-		start_tag = start_tag,
-		end_tag = end_tag
-	}
-	return liluat.loadstring(file_content, filename, options)
+function liluat.loadfile(filename, options)
+	return liluat.loadstring(read_entire_file(filename), filename, options)
 end
 
 -- @return a coroutine function

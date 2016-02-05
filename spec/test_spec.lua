@@ -322,6 +322,17 @@ coroutine.yield("b")]]
 
 			assert.same(expected_output, liluat.loadfile(template_path))
 		end)
+
+		it("should accept different tags via the options", function ()
+			local template_path = "spec/jinja.template"
+			local options = {
+				start_tag = "{%",
+				end_tag = "%}"
+			}
+			local expected_output = loadfile("spec/jinja.template.lua")()
+
+			assert.same(expected_output, liluat.loadfile(template_path, options))
+		end)
 	end)
 
 	describe("get_dependency", function ()
