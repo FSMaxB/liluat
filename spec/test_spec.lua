@@ -269,4 +269,58 @@ another line]]
 			assert.is_nil(liluat.private.sandbox(code, nil, nil, {})())
 		end)
 	end)
+
+	describe("liluat.loadstring", function ()
+		it("should compile templates into code", function ()
+			local template = "a#{i = 0}##{= i}#b"
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("a")
+i = 0
+coroutine.yield( i)
+coroutine.yield("b")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template))
+		end)
+
+		it("should accept template names", function ()
+			local template = "a"
+			local template_name = "my template"
+			local expected_output = {
+				name = "my template",
+				code = 'coroutine.yield("a")'
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, template_name))
+		end)
+
+		it("should accept other template tags passed as options", function ()
+			local template = "a{{i = 0}}{{= i}}b"
+			local options = {
+				start_tag = "{{",
+				end_tag = "}}"
+			}
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("a")
+i = 0
+coroutine.yield( i)
+coroutine.yield("b")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+	end)
+
+	describe("liluat.loadfile", function ()
+		it("should load a template file", function ()
+			local template_path = "spec/index.html.template"
+			local expected_output = loadfile("spec/index.html.template.lua")()
+
+			assert.same(expected_output, liluat.loadfile(template_path))
+		end)
+	end)
 end)
