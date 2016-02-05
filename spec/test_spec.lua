@@ -129,6 +129,35 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
+	describe("all_chunks", function ()
+		it("should iterate over all chunks", function ()
+			local template = [[
+#{= expression}# bla #{code}#
+ #{other code}# some text
+#{more code}##{}#
+some more text]]
+			local result = {}
+
+			for chunk in liluat.private.all_chunks(template, "#{", "}#") do
+				table.insert(result, chunk)
+			end
+
+			local expected_output = {
+				"#{= expression}#",
+				" bla ",
+				"#{code}#",
+				"\n ",
+				"#{other code}#",
+				" some text\n",
+				"#{more code}#",
+				"#{}#",
+				"\nsome more text"
+			}
+
+			assert.same(expected_output, result)
+		end)
+	end)
+
 	describe("sandbox", function ()
 		it("should run code in a sandbox", function ()
 			local code = "return i, 1"
