@@ -158,6 +158,13 @@ some more text]]
 		end)
 	end)
 
+	describe("read_entire_file", function ()
+		local file_content = liluat.private.read_entire_file("spec/read_entire_file-test")
+		local expected = "This should be read by the 'read_entire_file' helper functions.\n"
+
+		assert.equal(expected, file_content)
+	end)
+
 	describe("sandbox", function ()
 		it("should run code in a sandbox", function ()
 			local code = "return i, 1"

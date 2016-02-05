@@ -49,6 +49,15 @@ local function all_chunks(template, start_tag, end_tag)
 end
 liluat.private.all_chunks = all_chunks
 
+local function read_entire_file(path)
+	assert(path)
+	local file = assert(io.open(path))
+	local file_content = file:read('*a')
+	file:close()
+	return file_content
+end
+liluat.private.read_entire_file = read_entire_file
+
 -- recursively copy a table
 local function clone_table(table)
 	local clone = {}
