@@ -184,10 +184,10 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 		if include_path_literal then -- include chunk
 			local path = parse_string_literal(include_path_literal)
 
-			table.insert(include_list, path) -- to get a list of included files
+			add_include_and_detect_cycles(include_list, path)
 
 			local included_template = read_entire_file(path)
-			liluat.lex(included_template, start_tag, end_tag, output, include_list)
+			liluat.lex(included_template, start_tag, end_tag, output, include_list[path])
 			-- FIXME: This can result in 2 text chunks following each other
 		else -- other chunk
 			table.insert(output, chunk)
@@ -227,7 +227,21 @@ function liluat.get_dependency(template, start_tag, end_tag)
 	end_tag = end_tag or '}#'
 	local include_list = {}
 	liluat.lex(template, start_tag, end_tag, nil, include_list)
-	return stable_uniq(include_list)
+
+	local dependencies = {}
+	local have_seen = {} -- list of includes that were already added
+	local function recursive_traversal(list)
+		for key, value in pairs(list) do
+			if (type(key) == "string") and (not have_seen[key]) then
+				have_seen[key] = true
+				table.insert(dependencies, key)
+				recursive_traversal(value)
+			end
+		end
+	end
+
+	recursive_traversal(include_list)
+	return dependencies
 end
 
 -- @return { name = string, code = string / function}

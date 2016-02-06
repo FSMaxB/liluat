@@ -237,6 +237,16 @@ another line]]
 			assert.equal(output, result)
 			assert.same(expected_output, result)
 		end)
+
+		it("should detect cyclic inclusions", function ()
+			local template = liluat.private.read_entire_file("spec/cycle_a.template")
+
+			assert.has_error(
+				function ()
+					liluat.lex(template, "#{", "}#")
+				end,
+				"Cyclic inclusion detected")
+		end)
 	end)
 
 	describe("sandbox", function ()
