@@ -155,7 +155,8 @@ liluat.private.parse_string_literal = parse_string_literal
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
 -- @return table
-function liluat.lex(template, start_tag, end_tag, output)
+function liluat.lex(template, start_tag, end_tag, output, include_list)
+	include_list = include_list or {} -- a list of files that were included
 	local output = output or {}
 	local include_pattern = "^" .. escape_pattern(start_tag) .. "include:(.-)" .. escape_pattern(end_tag)
 
@@ -164,8 +165,11 @@ function liluat.lex(template, start_tag, end_tag, output)
 		local include_path_literal = chunk:match(include_pattern)
 		if include_path_literal then -- include chunk
 			local path = parse_string_literal(include_path_literal)
+
+			table.insert(include_list, path) -- to get a list of included files
+
 			local included_template = read_entire_file(path)
-			liluat.lex(included_template, start_tag, end_tag, output)
+			liluat.lex(included_template, start_tag, end_tag, output, include_list)
 			-- FIXME: This can result in 2 text chunks following each other
 		else -- other chunk
 			table.insert(output, chunk)
@@ -235,20 +239,11 @@ liluat.private.stable_uniq = stable_uniq
 
 -- @return { string }
 function liluat.get_dependency(template, start_tag, end_tag)
-	return stable_uniq(include_fold(template, start_tag, end_tag, function(acc, v, name)
-		if type(v) == 'string' then
-		elseif type(v) == 'table' then
-			if name ~= nil then
-				table.insert(acc, name)
-			end
-			for _, subname in ipairs(v) do
-				table.insert(acc, subname)
-			end
-		else
-			error('Unknown type: '..type(v))
-		end
-		return acc
-	end, function() return {} end))
+	start_tag = start_tag or '#{'
+	end_tag = end_tag or '}#'
+	local include_list = {}
+	liluat.lex(template, start_tag, end_tag, nil, include_list)
+	return stable_uniq(include_list)
 end
 
 -- @return { name = string, code = string / function}
