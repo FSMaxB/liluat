@@ -213,16 +213,10 @@ liluat.private.include_fold = include_fold
 -- preprocess included files
 -- @return string
 function liluat.precompile(template, start_tag, end_tag)
-	return table.concat(include_fold(template, start_tag, end_tag, function(acc, v)
-		if type(v) == 'string' then
-			table.insert(acc, v)
-		elseif type(v) == 'table' then
-			table.insert(acc, table.concat(v))
-		else
-			error('Unknown type: '..type(v))
-		end
-		return acc
-	end, function() return {} end))
+	start_tag = start_tag or "#{"
+	end_tag = end_tag or "}#"
+
+	return table.concat(liluat.lex(template, start_tag, end_tag))
 end
 
 -- unique a list, preserve order
