@@ -21,9 +21,12 @@ liluat.private.escape_pattern = escape_pattern
 
 -- creates an iterator that iterates over all chunks in the given template
 -- a chunk is either a template delimited by start_tag and end_tag or a normal text
+-- the iterator also returns the type of the chunk as second return value
 local function all_chunks(template, start_tag, end_tag)
 	-- pattern to match a template chunk
-	local pattern = escape_pattern(start_tag) .. ".-" .. escape_pattern(end_tag)
+	local template_pattern = escape_pattern(start_tag) .. ".-" .. escape_pattern(end_tag)
+	local include_pattern = escape_pattern(start_tag) .. "include:.-" .. escape_pattern(end_tag)
+	local expression_pattern = escape_pattern(start_tag) .. "=.-" .. escape_pattern(end_tag)
 	local position = 1
 
 	return function ()
@@ -31,19 +34,28 @@ local function all_chunks(template, start_tag, end_tag)
 			return nil
 		end
 
-		local template_start, template_end = template:find(pattern, position)
+		local template_start, template_end = template:find(template_pattern, position)
+		local chunk_type --type of the chunk (text, code, expression, include)
 
 		if template_start == position then -- next chunk is a template chunk
+			if template_start == template:find(include_pattern, position) then
+				chunk_type = "include"
+			elseif template_start == template:find(expression_pattern, position) then
+				chunk_type = "expression"
+			else
+				chunk_type = "code"
+			end
+
 			position = template_end + 1
-			return template:sub(template_start, template_end)
+			return {text = template:sub(template_start, template_end), type = chunk_type }
 		elseif template_start then -- next chunk is a text chunk
 			local chunk = template:sub(position, template_start - 1)
 			position = template_start
-			return chunk
+			return {text = chunk, type = "text"}
 		else -- no template chunk found --> either text chunk until end of file or no chunk at all
 			chunk = template:sub(position)
 			position = nil
-			return (#chunk > 0) and chunk or nil
+			return (#chunk > 0) and {text = chunk, type = "text"} or nil
 		end
 	end
 end
@@ -180,7 +192,7 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 
 	for chunk in all_chunks(template, start_tag, end_tag) do
 		-- handle includes
-		local include_path_literal = chunk:match(include_pattern)
+		local include_path_literal = chunk.text:match(include_pattern)
 		if include_path_literal then -- include chunk
 			local path = parse_string_literal(include_path_literal)
 
@@ -190,7 +202,7 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 			liluat.lex(included_template, start_tag, end_tag, output, include_list[path])
 			-- FIXME: This can result in 2 text chunks following each other
 		else -- other chunk
-			table.insert(output, chunk)
+			table.insert(output, chunk.text)
 		end
 
 	end

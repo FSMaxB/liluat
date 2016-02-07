@@ -135,6 +135,7 @@ Hello, &lt;world&gt;!
 #{= expression}# bla #{code}#
  #{other code}# some text
 #{more code}##{}#
+#{include: "bla"}#
 some more text]]
 			local result = {}
 
@@ -143,15 +144,50 @@ some more text]]
 			end
 
 			local expected_output = {
-				"#{= expression}#",
-				" bla ",
-				"#{code}#",
-				"\n ",
-				"#{other code}#",
-				" some text\n",
-				"#{more code}#",
-				"#{}#",
-				"\nsome more text"
+				{
+					text = "#{= expression}#",
+					type = "expression"
+				},
+				{
+					text = " bla ",
+					type = "text"
+				},
+				{
+					text = "#{code}#",
+					type = "code"
+				},
+				{
+					text = "\n ",
+					type = "text"
+				},
+				{
+					text = "#{other code}#",
+					type = "code"
+				},
+				{
+					text = " some text\n",
+					type = "text"
+				},
+				{
+					text = "#{more code}#",
+					type = "code"
+				},
+				{
+					text = "#{}#",
+					type = "code"
+				},
+				{
+					text = "\n",
+					type = "text"
+				},
+				{
+					text = '#{include: "bla"}#',
+					type = "include"
+				},
+				{
+					text = "\nsome more text",
+					type = "text"
+				}
 			}
 
 			assert.same(expected_output, result)
