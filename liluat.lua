@@ -207,20 +207,6 @@ function liluat.precompile(template, start_tag, end_tag)
 	return table.concat(liluat.lex(template, start_tag, end_tag))
 end
 
--- unique a list, preserve order
-local function stable_uniq(t)
-	local existed = {}
-	local res = {}
-	for _, v in ipairs(t) do
-		if not existed[v] then
-			table.insert(res, v)
-			existed[v] = true
-		end
-	end
-	return res
-end
-liluat.private.stable_uniq = stable_uniq
-
 -- @return { string }
 function liluat.get_dependency(template, start_tag, end_tag)
 	start_tag = start_tag or '#{'
