@@ -202,7 +202,7 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 			liluat.lex(included_template, start_tag, end_tag, output, include_list[path])
 			-- FIXME: This can result in 2 text chunks following each other
 		else -- other chunk
-			table.insert(output, chunk.text)
+			table.insert(output, chunk)
 		end
 
 	end
@@ -216,7 +216,12 @@ function liluat.precompile(template, start_tag, end_tag)
 	start_tag = start_tag or "#{"
 	end_tag = end_tag or "}#"
 
-	return table.concat(liluat.lex(template, start_tag, end_tag))
+	local output = ""
+	for _,chunk in ipairs(liluat.lex(template, start_tag, end_tag)) do
+		output = output .. chunk.text
+	end
+
+	return output
 end
 
 -- @return { string }
@@ -263,15 +268,13 @@ function liluat.loadstring(template, template_name, options)
 
 	for i, chunk in ipairs(lexed_template) do
 		-- check if the chunk is a template (either code or expression)
-		local expression = chunk:match(expression_pattern)
-		local code = expression and nil or chunk:match(code_pattern)
-
-		if expression then
+		if chunk.type == "expression" then
+			local expression = chunk.text:match(expression_pattern)
 			table.insert(lua_code, output_function..'('..expression..')')
-		elseif code then
-			table.insert(lua_code, code)
+		elseif chunk.type == "code" then
+			table.insert(lua_code, chunk.text:match(code_pattern))
 		else
-			table.insert(lua_code, output_function..'('..string.format("%q", chunk)..')')
+			table.insert(lua_code, output_function..'('..string.format("%q", chunk.text)..')')
 		end
 	end
 

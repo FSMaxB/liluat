@@ -219,15 +219,42 @@ some more text]]
 some more text]]
 
 			local expected_output = {
-				"#{= expression}#",
-				" bla ",
-				"#{code}#",
-				"\n ",
-				"#{other code}#",
-				" some text\n",
-				"#{more code}#",
-				"#{}#",
-				"\nsome more text"
+				{
+					text = "#{= expression}#",
+					type = "expression"
+				},
+				{
+					text = " bla ",
+					type = "text"
+				},
+				{
+					text = "#{code}#",
+					type = "code"
+				},
+				{
+					text = "\n ",
+					type = "text"
+				},
+				{
+					text = "#{other code}#",
+					type = "code"
+				},
+				{
+					text = " some text\n",
+					type = "text"
+				},
+				{
+					text = "#{more code}#",
+					type = "code"
+				},
+				{
+					text = "#{}#",
+					type = "code"
+				},
+				{
+					text = "\nsome more text",
+					type = "text"
+				}
 			}
 
 			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
@@ -240,9 +267,18 @@ first line
 another line]]
 
 			local expected_output = {
-				"first line\n",
-				"This should be read by the 'read_entire_file' helper functions.\n",
-				"\nanother line"
+				{
+					text = "first line\n",
+					type = "text"
+				},
+				{
+					text = "This should be read by the 'read_entire_file' helper functions.\n",
+					type = "text"
+				},
+				{
+					text = "\nanother line",
+					type = "text"
+				}
 			}
 
 			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
@@ -251,9 +287,18 @@ another line]]
 		it("should work with other start and end tags", function ()
 			local template = "text {%--template%} more text"
 			local expected_output = {
-				"text ",
-				"{%--template%}",
-				" more text"
+				{
+					text = "text ",
+					type = "text"
+				},
+				{
+					text = "{%--template%}",
+					type = "code"
+				},
+				{
+					text = " more text",
+					type = "text"
+				}
 			}
 
 			assert.same(expected_output, liluat.lex(template, "{%", "%}"))
@@ -263,9 +308,18 @@ another line]]
 			local template = "bla {{= 5}} more bla"
 			local output = {}
 			local expected_output = {
-				"bla ",
-				"{{= 5}}",
-				" more bla"
+				{
+					text = "bla ",
+					type = "text"
+				},
+				{
+					text = "{{= 5}}",
+					type = "expression"
+				},
+				{
+					text = " more bla",
+					type = "text"
+				}
 			}
 
 			local result = liluat.lex(template, "{{", "}}", output)
