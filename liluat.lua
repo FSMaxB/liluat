@@ -19,14 +19,26 @@ local function escape_pattern(text)
 end
 liluat.private.escape_pattern = escape_pattern
 
+-- initialise table of options (use the provided, default otherwise)
+local function initialise_options(options)
+	options = options or {}
+	options.start_tag = options.start_tag or "#{"
+	options.end_tag = options.end_tag or "}#"
+	options.template_name = options.template_name or "default_name"
+
+	return options
+end
+
 -- creates an iterator that iterates over all chunks in the given template
 -- a chunk is either a template delimited by start_tag and end_tag or a normal text
 -- the iterator also returns the type of the chunk as second return value
-local function all_chunks(template, start_tag, end_tag)
+local function all_chunks(template, options)
+	options = initialise_options(options)
+
 	-- pattern to match a template chunk
-	local template_pattern = escape_pattern(start_tag) .. ".-" .. escape_pattern(end_tag)
-	local include_pattern = escape_pattern(start_tag) .. "include:.-" .. escape_pattern(end_tag)
-	local expression_pattern = escape_pattern(start_tag) .. "=.-" .. escape_pattern(end_tag)
+	local template_pattern = escape_pattern(options.start_tag) .. ".-" .. escape_pattern(options.end_tag)
+	local include_pattern = escape_pattern(options.start_tag) .. "include:.-" .. escape_pattern(options.end_tag)
+	local expression_pattern = escape_pattern(options.start_tag) .. "=.-" .. escape_pattern(options.end_tag)
 	local position = 1
 
 	return function ()
@@ -185,12 +197,14 @@ liluat.private.add_include_and_detect_cycles = add_include_and_detect_cycles
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
 -- @return table
-function liluat.lex(template, start_tag, end_tag, output, include_list)
+function liluat.lex(template, options, output, include_list)
+	options = initialise_options(options)
+
 	include_list = include_list or {} -- a list of files that were included
 	local output = output or {}
-	local include_pattern = "^" .. escape_pattern(start_tag) .. "include:(.-)" .. escape_pattern(end_tag)
+	local include_pattern = "^" .. escape_pattern(options.start_tag) .. "include:(.-)" .. escape_pattern(options.end_tag)
 
-	for chunk in all_chunks(template, start_tag, end_tag) do
+	for chunk in all_chunks(template, options) do
 		-- handle includes
 		if chunk.type == "include" then -- include chunk
 			local include_path_literal = chunk.text:match(include_pattern)
@@ -199,7 +213,7 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 			add_include_and_detect_cycles(include_list, path)
 
 			local included_template = read_entire_file(path)
-			liluat.lex(included_template, start_tag, end_tag, output, include_list[path])
+			liluat.lex(included_template, options, output, include_list[path])
 		elseif (chunk.type == "text") and output[#output] and (output[#output].type == "text") then
 			-- ensure that no two text chunks follow each other
 			output[#output].text = output[#output].text .. chunk.text
@@ -214,9 +228,8 @@ end
 
 -- preprocess included files
 -- @return string
-function liluat.precompile(template, start_tag, end_tag)
-	start_tag = start_tag or "#{"
-	end_tag = end_tag or "}#"
+function liluat.precompile(template, options)
+	options = initialise_options(options)
 
 	local output = ""
 	for _,chunk in ipairs(liluat.lex(template, start_tag, end_tag)) do
@@ -227,11 +240,11 @@ function liluat.precompile(template, start_tag, end_tag)
 end
 
 -- @return { string }
-function liluat.get_dependency(template, start_tag, end_tag)
-	start_tag = start_tag or '#{'
-	end_tag = end_tag or '}#'
+function liluat.get_dependency(template, options)
+	options = initialise_options(options)
+
 	local include_list = {}
-	liluat.lex(template, start_tag, end_tag, nil, include_list)
+	liluat.lex(template, options, nil, include_list)
 
 	local dependencies = {}
 	local have_seen = {} -- list of includes that were already added
@@ -251,15 +264,13 @@ end
 
 -- @return { name = string, code = string / function}
 function liluat.loadstring(template, template_name, options)
-	options = options or {}
-	options.start_tag = options.start_tag or '#{'
-	options.end_tag = options.end_tag or '}#'
+	options = initialise_options(options)
 	options.template_name = template_name or '=(liluat.loadstring)'
 
 	local output_function = "coroutine.yield"
 
 	-- split the template string into chunks
-	local lexed_template = liluat.lex(template, options.start_tag, options.end_tag)
+	local lexed_template = liluat.lex(template, options)
 
 	-- pattern to match different kinds of templates
 	local expression_pattern = escape_pattern(options.start_tag) .. "=(.-)" .. escape_pattern(options.end_tag)

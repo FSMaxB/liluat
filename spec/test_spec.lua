@@ -139,7 +139,7 @@ Hello, &lt;world&gt;!
 some more text]]
 			local result = {}
 
-			for chunk in liluat.private.all_chunks(template, "#{", "}#") do
+			for chunk in liluat.private.all_chunks(template) do
 				table.insert(result, chunk)
 			end
 
@@ -257,7 +257,7 @@ some more text]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
+			assert.same(expected_output, liluat.lex(template))
 		end)
 
 		it("should include files", function ()
@@ -273,7 +273,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
+			assert.same(expected_output, liluat.lex(template))
 		end)
 
 		it("should work with other start and end tags", function ()
@@ -293,7 +293,11 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, "{%", "%}"))
+			local options = {
+				start_tag = "{%",
+				end_tag = "%}"
+			}
+			assert.same(expected_output, liluat.lex(template, options))
 		end)
 
 		it("should use existing table if specified", function ()
@@ -314,7 +318,11 @@ another line]]
 				}
 			}
 
-			local result = liluat.lex(template, "{{", "}}", output)
+			local options = {
+				start_tag = "{{",
+				end_tag = "}}"
+			}
+			local result = liluat.lex(template, options, output)
 
 			assert.equal(output, result)
 			assert.same(expected_output, result)
@@ -325,7 +333,7 @@ another line]]
 
 			assert.has_error(
 				function ()
-					liluat.lex(template, "#{", "}#")
+					liluat.lex(template)
 				end,
 				"Cyclic inclusion detected")
 		end)
@@ -340,7 +348,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
+			assert.same(expected_output, liluat.lex(template))
 		end)
 	end)
 
