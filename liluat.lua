@@ -192,8 +192,8 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 
 	for chunk in all_chunks(template, start_tag, end_tag) do
 		-- handle includes
-		local include_path_literal = chunk.text:match(include_pattern)
-		if include_path_literal then -- include chunk
+		if chunk.type == "include" then -- include chunk
+			local include_path_literal = chunk.text:match(include_pattern)
 			local path = parse_string_literal(include_path_literal)
 
 			add_include_and_detect_cycles(include_list, path)
