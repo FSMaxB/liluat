@@ -268,15 +268,7 @@ another line]]
 
 			local expected_output = {
 				{
-					text = "first line\n",
-					type = "text"
-				},
-				{
-					text = "This should be read by the 'read_entire_file' helper functions.\n",
-					type = "text"
-				},
-				{
-					text = "\nanother line",
+					text = "first line\nThis should be read by the 'read_entire_file' helper functions.\n\nanother line",
 					type = "text"
 				}
 			}
@@ -336,6 +328,19 @@ another line]]
 					liluat.lex(template, "#{", "}#")
 				end,
 				"Cyclic inclusion detected")
+		end)
+
+		it("should not create two or more text chunks in a row", function ()
+			local template = 'text#{include: "spec/content.html.template"}#more text'
+
+			local expected_output = {
+				{
+					text = "text<h1>This is the index page.</h1>\nmore text",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, liluat.lex(template, "#{", "}#"))
 		end)
 	end)
 

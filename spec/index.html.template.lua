@@ -8,10 +8,8 @@ coroutine.yield( title)
 coroutine.yield("</title>\
 </head>\
 <body>\
-    ")
-coroutine.yield("<h1>This is the index page.</h1>\
-")
-coroutine.yield("\
+    <h1>This is the index page.</h1>\
+\
     <ol>\
     ")
 for i = 1, 5 do

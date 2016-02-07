@@ -200,7 +200,9 @@ function liluat.lex(template, start_tag, end_tag, output, include_list)
 
 			local included_template = read_entire_file(path)
 			liluat.lex(included_template, start_tag, end_tag, output, include_list[path])
-			-- FIXME: This can result in 2 text chunks following each other
+		elseif (chunk.type == "text") and output[#output] and (output[#output].type == "text") then
+			-- ensure that no two text chunks follow each other
+			output[#output].text = output[#output].text .. chunk.text
 		else -- other chunk
 			table.insert(output, chunk)
 		end
