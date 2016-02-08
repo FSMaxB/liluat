@@ -1,0 +1,16 @@
+language: c
+sudo: false
+
+env:
+  - LUA='Lua 5.1'
+  - LUA='Lua 5.2'
+  - LUA='Lua 5.3'
+  - LUA='LuaJIT 2.0'
+
+before_install:
+  - bash ci/setup.sh
+
+install:
+  - bash ci/install.sh
+
+script: bash ci/test.sh
