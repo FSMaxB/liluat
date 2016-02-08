@@ -1,5 +1,7 @@
 # slt2
 
+[![Travis Build Status](https://travis-ci.org/FSMaxB/liluat.svg?branch=master)](https://travis-ci.org/FSMaxB/liluat)
+
 slt2 is a Lua template processor. Similar to php or jsp, you can embed lua code directly.
 
 ## Installation
