@@ -1,13 +1,14 @@
 --[[
--- slt2 - Simple Lua Template 2
+-- liluat - Lightweight Lua Template engine
 --
--- Project page: https://github.com/henix/slt2
+-- Project page: https://github.com/FSMaxB/liluat
 --
+-- liluat is based on slt2 by henix, see https://github.com/henix/slt2
 -- @License
 -- MIT License
 --]]
 
-local slt2 = {
+local liluat = {
 	private = {} --used to expose private functions for testing
 }
 
@@ -43,11 +44,11 @@ local function include_fold(template, start_tag, end_tag, fold_func, init_func)
 	result = fold_func(result, string.sub(template, end2 + 1))
 	return result
 end
-slt2.private.include_fold = include_fold
+liluat.private.include_fold = include_fold
 
 -- preprocess included files
 -- @return string
-function slt2.precompile(template, start_tag, end_tag)
+function liluat.precompile(template, start_tag, end_tag)
 	return table.concat(include_fold(template, start_tag, end_tag, function(acc, v)
 		if type(v) == 'string' then
 			table.insert(acc, v)
@@ -72,10 +73,10 @@ local function stable_uniq(t)
 	end
 	return res
 end
-slt2.private.stable_uniq = stable_uniq
+liluat.private.stable_uniq = stable_uniq
 
 -- @return { string }
-function slt2.get_dependency(template, start_tag, end_tag)
+function liluat.get_dependency(template, start_tag, end_tag)
 	return stable_uniq(include_fold(template, start_tag, end_tag, function(acc, v, name)
 		if type(v) == 'string' then
 		elseif type(v) == 'table' then
@@ -93,7 +94,7 @@ function slt2.get_dependency(template, start_tag, end_tag)
 end
 
 -- @return { name = string, code = string / function}
-function slt2.loadstring(template, start_tag, end_tag, tmpl_name)
+function liluat.loadstring(template, start_tag, end_tag, tmpl_name)
 	-- compile it to lua code
 	local lua_code = {}
 
@@ -102,7 +103,7 @@ function slt2.loadstring(template, start_tag, end_tag, tmpl_name)
 
 	local output_func = "coroutine.yield"
 
-	template = slt2.precompile(template, start_tag, end_tag)
+	template = liluat.precompile(template, start_tag, end_tag)
 
 	local start1, end1 = string.find(template, start_tag, 1, true)
 	local start2 = nil
@@ -125,7 +126,7 @@ function slt2.loadstring(template, start_tag, end_tag, tmpl_name)
 	end
 	table.insert(lua_code, output_func..'('..string.format("%q", string.sub(template, end2 + 1))..')')
 
-	local ret = { name = tmpl_name or '=(slt2.loadstring)' }
+	local ret = { name = tmpl_name or '=(liluat.loadstring)' }
 	if setfenv == nil then -- lua 5.2
 		ret.code = table.concat(lua_code, '\n')
 	else -- lua 5.1
@@ -135,18 +136,18 @@ function slt2.loadstring(template, start_tag, end_tag, tmpl_name)
 end
 
 -- @return { name = string, code = string / function }
-function slt2.loadfile(filename, start_tag, end_tag)
+function liluat.loadfile(filename, start_tag, end_tag)
 	local fin = assert(io.open(filename))
 	local all = fin:read('*a')
 	fin:close()
-	return slt2.loadstring(all, start_tag, end_tag, filename)
+	return liluat.loadstring(all, start_tag, end_tag, filename)
 end
 
 local mt52 = { __index = _ENV }
 local mt51 = { __index = _G }
 
 -- @return a coroutine function
-function slt2.render_co(t, env)
+function liluat.render_co(t, env)
 	local f
 	if setfenv == nil then -- lua 5.2
 		if env ~= nil then
@@ -163,9 +164,9 @@ function slt2.render_co(t, env)
 end
 
 -- @return string
-function slt2.render(t, env)
+function liluat.render(t, env)
 	local result = {}
-	local co = coroutine.create(slt2.render_co(t, env))
+	local co = coroutine.create(liluat.render_co(t, env))
 	while coroutine.status(co) ~= 'dead' do
 		local ok, chunk = coroutine.resume(co)
 		if not ok then
@@ -176,4 +177,4 @@ function slt2.render(t, env)
 	return table.concat(result)
 end
 
-return slt2
+return liluat

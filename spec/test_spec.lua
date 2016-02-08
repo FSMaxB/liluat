@@ -1,12 +1,12 @@
-local slt2 = require("slt2")
+local liluat = require("liluat")
 
-describe("slt2", function ()
+describe("liluat", function ()
 	it("should return an empty string for empty templates", function ()
-		assert.equal("", slt2.render(slt2.loadstring(""), {}))
+		assert.equal("", liluat.render(liluat.loadstring(""), {}))
 	end)
 
 	it("should render some example template", function ()
-		local tmpl = slt2.loadstring([[<span>
+		local tmpl = liluat.loadstring([[<span>
 #{ if user ~= nil then }#
 Hello, #{= escapeHTML(user.name) }#!
 #{ else }#
@@ -34,6 +34,6 @@ Hello, &lt;world&gt;!
 			return r
 		end
 
-		assert.equal(expected_output, slt2.render(tmpl, {user = {name = "<world>"}, escapeHTML = escapeHTML }))
+		assert.equal(expected_output, liluat.render(tmpl, {user = {name = "<world>"}, escapeHTML = escapeHTML }))
 	end)
 end)
