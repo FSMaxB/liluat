@@ -7,7 +7,9 @@
 -- MIT License
 --]]
 
-local slt2 = {}
+local slt2 = {
+	private = {} --used to expose private functions for testing
+}
 
 -- a tree fold on inclusion tree
 -- @param init_func: must return a new value when called
@@ -41,6 +43,7 @@ local function include_fold(template, start_tag, end_tag, fold_func, init_func)
 	result = fold_func(result, string.sub(template, end2 + 1))
 	return result
 end
+slt2.private.include_fold = include_fold
 
 -- preprocess included files
 -- @return string
@@ -69,6 +72,7 @@ local function stable_uniq(t)
 	end
 	return res
 end
+slt2.private.stable_uniq = stable_uniq
 
 -- @return { string }
 function slt2.get_dependency(template, start_tag, end_tag)
