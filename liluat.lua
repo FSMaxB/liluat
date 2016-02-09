@@ -221,13 +221,10 @@ function liluat.loadstring(template, start_tag, end_tag, tmpl_name)
 	end
 	table.insert(lua_code, output_func..'('..string.format("%q", string.sub(template, end2 + 1))..')')
 
-	local ret = { name = tmpl_name or '=(liluat.loadstring)' }
-	if setfenv == nil then -- lua 5.2
-		ret.code = table.concat(lua_code, '\n')
-	else -- lua 5.1
-		ret.code = assert(loadstring(table.concat(lua_code, '\n'), ret.name))
-	end
-	return ret
+	return {
+		name = tmpl_name or '=(liluat.loadstring)',
+		code = table.concat(lua_code, '\n')
+	}
 end
 
 -- @return { name = string, code = string / function }
@@ -238,24 +235,9 @@ function liluat.loadfile(filename, start_tag, end_tag)
 	return liluat.loadstring(all, start_tag, end_tag, filename)
 end
 
-local mt52 = { __index = _ENV }
-local mt51 = { __index = _G }
-
 -- @return a coroutine function
-function liluat.render_co(t, env)
-	local f
-	if setfenv == nil then -- lua 5.2
-		if env ~= nil then
-			setmetatable(env, mt52)
-		end
-		f = assert(load(t.code, t.name, 't', env or _ENV))
-	else -- lua 5.1
-		if env ~= nil then
-			setmetatable(env, mt51)
-		end
-		f = setfenv(t.code, env or _G)
-	end
-	return f
+function liluat.render_co(template, environment)
+	return sandbox(template.code, template.name, environment)
 end
 
 -- @return string
