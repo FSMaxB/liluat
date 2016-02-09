@@ -35,6 +35,29 @@ local function clone_table(table)
 end
 liluat.private.clone_table = clone_table
 
+-- recursively merge two tables, the second one has precedence
+local function merge_tables(a, b)
+	a = a or {}
+	b = b or {}
+
+	local merged = clone_table(a)
+
+	for key, value in pairs(b) do
+		if type(value) == "table" then
+			if a[key] then
+				merged[key] = merge_tables(a[key], value)
+			else
+				merged[key] = clone_table(value)
+			end
+		else
+			merged[key] = value
+		end
+	end
+
+	return merged
+end
+liluat.private.merge_tables = merge_tables
+
 -- a tree fold on inclusion tree
 -- @param init_func: must return a new value when called
 local function include_fold(template, start_tag, end_tag, fold_func, init_func)

@@ -58,6 +58,66 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
+	describe("merge_tables", function ()
+		it("should merge two tables", function ()
+			local a = {
+				a = 1,
+				b = 2,
+				c = {
+					d = 3,
+					e = {
+						f = 4
+					}
+				},
+				g = {
+					h = 5
+				}
+			}
+
+			local b = {
+				b = 3,
+				x = 5,
+				y = {
+					z = 4
+				},
+				c = {
+					j = 5
+				}
+			}
+
+			local expected_output = {
+				a = 1,
+				b = 3,
+				c = {
+					d = 3,
+					e = {
+						f = 4
+					},
+					j = 5
+				},
+				g = {
+					h = 5
+				},
+				x = 5,
+				y = {
+					z = 4
+				}
+			}
+
+			assert.same(expected_output, liluat.private.merge_tables(a, b))
+		end)
+
+		it("should merge nil tables", function ()
+			local a = {
+				a = 1
+			}
+
+			assert.same({a = 1}, liluat.private.merge_tables(nil, a))
+			assert.same({a = 1}, liluat.private.merge_tables(a, nil))
+			assert.same({}, liluat.private.merge_tables(nil, nil))
+		end)
+	end)
+
 	describe("escape_pattern", function ()
 		it("should escape lua pattern special characters", function ()
 			local input = ".%a%c%d%l%p%s%u%w%x%z().%%+-*?[]^$"
