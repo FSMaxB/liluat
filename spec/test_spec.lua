@@ -346,6 +346,15 @@ coroutine.yield("b")]]
 		end)
 	end)
 
+	describe("liluat.precompile", function ()
+		it("should precompile a template", function ()
+			local template = liluat.private.read_entire_file("spec/index.html.template")
+			local expected_output = liluat.private.read_entire_file("spec/index.html.template.precompiled")
+
+			assert.equal(expected_output, liluat.precompile(template))
+		end)
+	end)
+
 	describe("sandbox", function ()
 		it("should run code in a sandbox", function ()
 			local code = "return i, 1"
