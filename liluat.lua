@@ -171,7 +171,7 @@ local function include_fold(template, start_tag, end_tag, fold_func, init_func)
 		start2, end2 = string.find(template, end_tag, end1 + 1, true)
 		assert(start2, 'end tag "'..end_tag..'" missing')
 		do -- recursively include the file
-			local filename = assert(loadstring('return '..string.sub(template, end1 + 1, start2 - 1)))()
+			local filename = parse_string_literal(string.sub(template, end1 + 1, start2 - 1))
 			assert(filename)
 			local fin = assert(io.open(filename))
 			-- TODO: detect cyclic inclusion?
