@@ -203,8 +203,9 @@ liluat.private.dirname = dirname
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
 -- @return table
-function liluat.lex(template, options, output, include_list)
+function liluat.lex(template, options, output, include_list, current_path)
 	options = initialise_options(options)
+	current_path = current_path or "." -- current include path
 
 	include_list = include_list or {} -- a list of files that were included
 	local output = output or {}
@@ -216,10 +217,19 @@ function liluat.lex(template, options, output, include_list)
 			local include_path_literal = chunk.text:match(include_pattern)
 			local path = parse_string_literal(include_path_literal)
 
+			-- build complete path
+			if path:find("^/") then
+				--absolute path, don't modify
+			elseif options.base_path then
+				path = options.base_path .. "/" .. path
+			else
+				path = dirname(current_path) .. path
+			end
+
 			add_include_and_detect_cycles(include_list, path)
 
 			local included_template = read_entire_file(path)
-			liluat.lex(included_template, options, output, include_list[path])
+			liluat.lex(included_template, options, output, include_list[path], path)
 		elseif (chunk.type == "text") and output[#output] and (output[#output].type == "text") then
 			-- ensure that no two text chunks follow each other
 			output[#output].text = output[#output].text .. chunk.text
@@ -234,11 +244,11 @@ end
 
 -- preprocess included files
 -- @return string
-function liluat.precompile(template, options)
+function liluat.precompile(template, options, path)
 	options = initialise_options(options)
 
 	local output = ""
-	for _,chunk in ipairs(liluat.lex(template, start_tag, end_tag)) do
+	for _,chunk in ipairs(liluat.lex(template, options, nil, nil, path)) do
 		output = output .. chunk.text
 	end
 
@@ -269,14 +279,14 @@ function liluat.get_dependency(template, options)
 end
 
 -- @return { name = string, code = string / function}
-function liluat.loadstring(template, template_name, options)
+function liluat.loadstring(template, template_name, options, path)
 	options = initialise_options(options)
 	options.template_name = template_name or '=(liluat.loadstring)'
 
 	local output_function = "coroutine.yield"
 
 	-- split the template string into chunks
-	local lexed_template = liluat.lex(template, options)
+	local lexed_template = liluat.lex(template, options, nil, nil, path)
 
 	-- pattern to match different kinds of templates
 	local expression_pattern = escape_pattern(options.start_tag) .. "=(.-)" .. escape_pattern(options.end_tag)
@@ -305,7 +315,7 @@ end
 
 -- @return { name = string, code = string / function }
 function liluat.loadfile(filename, options)
-	return liluat.loadstring(read_entire_file(filename), filename, options)
+	return liluat.loadstring(read_entire_file(filename), filename, options, filename)
 end
 
 -- @return a coroutine function

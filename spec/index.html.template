@@ -5,7 +5,7 @@
     <title>#{= title}#</title>
 </head>
 <body>
-    #{include: "spec/content.html.template"}#
+    #{include: "content.html.template"}#
     <ol>
     #{for i = 1, 5 do}#
         <li>#{= i}</li>

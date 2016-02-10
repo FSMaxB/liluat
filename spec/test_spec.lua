@@ -329,7 +329,7 @@ another line]]
 		end)
 
 		it("should detect cyclic inclusions", function ()
-			local template = liluat.private.read_entire_file("spec/cycle_a.template")
+			local template = "#{include: 'spec/cycle_a.template'}#"
 
 			assert.has_error(
 				function ()
@@ -349,6 +349,53 @@ another line]]
 			}
 
 			assert.same(expected_output, liluat.lex(template))
+		end)
+
+		it("should include relative paths", function ()
+			local template_path = "spec/basepath_tests/base_a.template"
+			local template = liluat.private.read_entire_file(template_path)
+			local expected_output = {
+				{
+					text = "<h1>This is the index page.</h1>\n\n\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, liluat.lex(template, nil, nil, nil, template_path))
+		end)
+
+		it("should include paths relative to a base path", function ()
+			local options = {
+				base_path = "spec/basepath_tests"
+			}
+			local template_path = options.base_path .. "/base_a.template"
+			local template = liluat.private.read_entire_file(template_path)
+
+			local expected_output = {
+				{
+					text = "<h1>This is the index page.</h1>\n\n\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, liluat.lex(template, options))
+		end)
+
+		it("should include more paths relative to a base path", function ()
+			local options = {
+				base_path = "spec"
+			}
+			local template_path = options.base_path .. "/basepath_tests/base_b.template"
+			local template = liluat.private.read_entire_file(template_path)
+
+			local expected_output = {
+				{
+					text = "<h1>This is the index page.</h1>\n\n\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, liluat.lex(template, options))
 		end)
 	end)
 
@@ -475,7 +522,7 @@ coroutine.yield("b")]]
 			local template = liluat.private.read_entire_file("spec/index.html.template")
 			local expected_output = liluat.private.read_entire_file("spec/index.html.template.precompiled")
 
-			assert.equal(expected_output, liluat.precompile(template))
+			assert.equal(expected_output, liluat.precompile(template, nil, "spec/"))
 		end)
 	end)
 
