@@ -323,4 +323,52 @@ coroutine.yield("b")]]
 			assert.same(expected_output, liluat.loadfile(template_path))
 		end)
 	end)
+
+	describe("get_dependency", function ()
+		it("should list all includes", function ()
+			local template = '#{include: "spec/index.html.template"}#'
+			local expected_output = {
+				"spec/index.html.template",
+				"spec/content.html.template"
+			}
+
+			assert.same(expected_output, liluat.get_dependency(template))
+		end)
+
+		it("should list every file only once", function ()
+			local template = '#{include: "spec/index.html.template"}##{include: "spec/index.html.template"}#'
+			local expected_output = {
+				"spec/index.html.template",
+				"spec/content.html.template"
+			}
+
+			assert.same(expected_output, liluat.get_dependency(template))
+		end)
+	end)
+
+	describe("sandbox", function ()
+		it("should run code in a sandbox", function ()
+			local code = "return i, 1"
+			local i = 1
+			local a, b = liluat.private.sandbox(code)()
+
+			assert.is_nil(a)
+			assert.equal(1, b)
+		end)
+
+		it("should pass an environment", function ()
+			local code = "return i"
+			assert.equal(1, liluat.private.sandbox(code, nil, {i = 1})())
+		end)
+
+		it("should not have access to non-whitelisted functions", function ()
+			local code = "return load"
+			assert.is_nil(liluat.private.sandbox(code)())
+		end)
+
+		it("should have access to whitelisted functions", function ()
+			local code = "return os.time"
+			assert.is_function(liluat.private.sandbox(code)())
+		end)
+	end)
 end)
