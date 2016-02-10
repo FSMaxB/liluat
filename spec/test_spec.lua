@@ -391,4 +391,37 @@ coroutine.yield("b")]]
 			assert.is_function(liluat.private.sandbox(code)())
 		end)
 	end)
+
+	describe("add_include_and_detect_cycles", function ()
+		it("should add includes", function ()
+			local include_list = {}
+
+			liluat.private.add_include_and_detect_cycles(include_list, "a")
+			liluat.private.add_include_and_detect_cycles(include_list.a, "b")
+			liluat.private.add_include_and_detect_cycles(include_list.a.b, "c")
+			liluat.private.add_include_and_detect_cycles(include_list, "d")
+
+			assert.is_nil(include_list[0])
+			assert.equal(include_list, include_list.a[0])
+			assert.is_table(include_list.a)
+			assert.equal(include_list.a, include_list.a.b[0])
+			assert.is_table(include_list.a.b)
+			assert.equal(include_list.a.b, include_list.a.b.c[0])
+			assert.is_table(include_list.a.b.c)
+			assert.is_equal(include_list, include_list.d[0])
+			assert.is_table(include_list.d)
+		end)
+
+		it("should detect inclusion cycles", function ()
+			local include_list = {}
+
+			liluat.private.add_include_and_detect_cycles(include_list, "a")
+			liluat.private.add_include_and_detect_cycles(include_list.a, "b")
+			assert.has_error(
+				function ()
+					liluat.private.add_include_and_detect_cycles(include_list.a.b, "a")
+				end,
+				"Cyclic inclusion detected")
+		end)
+	end)
 end)

@@ -151,6 +151,24 @@ local function parse_string_literal(string_literal)
 end
 liluat.private.parse_string_literal = parse_string_literal
 
+-- add an include to the include_list and throw an error if
+-- an inclusion cycle is detected
+local function add_include_and_detect_cycles(include_list, path)
+	local parent = include_list[0]
+	while parent do -- while the root hasn't been reached
+		if parent[path] then
+			error("Cyclic inclusion detected")
+		end
+
+		parent = parent[0]
+	end
+
+	include_list[path] = {
+		[0] = include_list
+	}
+end
+liluat.private.add_include_and_detect_cycles = add_include_and_detect_cycles
+
 -- splits a template into chunks
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
