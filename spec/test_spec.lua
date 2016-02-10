@@ -128,4 +128,35 @@ Hello, &lt;world&gt;!
 			assert.truthy(input:find(escaped_pattern))
 		end)
 	end)
+
+	describe("sandbox", function ()
+		it("should run code in a sandbox", function ()
+			local code = "return i, 1"
+			local i = 1
+			local a, b = liluat.private.sandbox(code)()
+
+			assert.is_nil(a)
+			assert.equal(1, b)
+		end)
+
+		it("should pass an environment", function ()
+			local code = "return i"
+			assert.equal(1, liluat.private.sandbox(code, nil, {i = 1})())
+		end)
+
+		it("should not have access to non-whitelisted functions", function ()
+			local code = "return load"
+			assert.is_nil(liluat.private.sandbox(code)())
+		end)
+
+		it("should have access to whitelisted functions", function ()
+			local code = "return os.time"
+			assert.is_function(liluat.private.sandbox(code)())
+		end)
+
+		it("should accept custom whitelists", function ()
+			local code = "return string and string.find"
+			assert.is_nil(liluat.private.sandbox(code, nil, nil, {})())
+		end)
+	end)
 end)

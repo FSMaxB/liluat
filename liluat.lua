@@ -58,6 +58,55 @@ local function merge_tables(a, b)
 end
 liluat.private.merge_tables = merge_tables
 
+-- a whitelist of allowed functions
+local sandbox_whitelist = {
+	ipairs = ipairs,
+	next = next,
+	pairs = pairs,
+	rawequal = rawequal,
+	rawget = rawget,
+	rawset = rawset,
+	select = select,
+	tonumber = tonumber,
+	tostring = tostring,
+	type = type,
+	unpack = unpack,
+	string = string,
+	table = table,
+	math = math,
+	os = {
+		date = os.date,
+		difftime = os.difftime,
+		time = os.time,
+	},
+	coroutine = coroutine
+}
+
+-- creates a function in a sandbox from a given code,
+-- name of the execution context and an environment
+-- that will be available inside the sandbox,
+-- optionally overwrite the whitelis
+local function sandbox(code, name, environment, whitelist)
+	whitelist = whitelist or sandbox_whitelist
+
+	-- prepare the environment
+	environment = merge_tables(whitelist, environment)
+
+	local func
+	if setfenv then --Lua 5.1 and compatible
+		if code:byte(1) == 27 then
+			error("Lua bytecode not permitted.")
+		end
+		func = assert(loadstring(code))
+		setfenv(func, environment)
+	else -- Lua 5.2 and later
+		func = assert(load(code, name, 't', environment))
+	end
+
+	return func
+end
+liluat.private.sandbox = sandbox
+
 -- a tree fold on inclusion tree
 -- @param init_func: must return a new value when called
 local function include_fold(template, start_tag, end_tag, fold_func, init_func)
