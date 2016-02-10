@@ -193,6 +193,12 @@ local function add_include_and_detect_cycles(include_list, path)
 end
 liluat.private.add_include_and_detect_cycles = add_include_and_detect_cycles
 
+-- extract the name of a directory from a path
+local function dirname(path)
+	return path:match("^(.*/).-$") or ""
+end
+liluat.private.dirname = dirname
+
 -- splits a template into chunks
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
