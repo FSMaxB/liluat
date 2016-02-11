@@ -62,7 +62,7 @@ local default_options = {
 	start_tag = "#{",
 	end_tag = "}#",
 	template_name = "default_name",
-	trim_right = false
+	trim_right = "code"
 }
 
 -- initialise table of options (use the provided, default otherwise)

@@ -8,7 +8,7 @@
     #{include: "content.html.template"}#
     <ol>
     #{for i = 1, 5 do}#
-        <li>#{= i}</li>
+        <li>#{= i}#</li>
     #{end}#
     </ol>
 </body>

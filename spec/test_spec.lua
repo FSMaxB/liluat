@@ -16,9 +16,7 @@ Hello, #{= escapeHTML(user.name) }#!
 ]])
 
 		local expected_output = [[<span>
-
 Hello, &lt;world&gt;!
-
 </span>
 ]]
 

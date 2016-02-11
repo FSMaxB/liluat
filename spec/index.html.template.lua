@@ -1,5 +1,6 @@
 return {
-	code = [[coroutine.yield("<!DOCTYPE html>\
+	code = [[
+coroutine.yield("<!DOCTYPE html>\
 <html lang=\"en\">\
 <head>\
     <meta charset=\"UTF-8\">\
@@ -13,12 +14,12 @@ coroutine.yield("</title>\
     <ol>\
     ")
 for i = 1, 5 do
-coroutine.yield("\
-        <li>")
-coroutine.yield( i}</li>
-    #{end)
-coroutine.yield("\
-    </ol>\
+coroutine.yield("        <li>")
+coroutine.yield( i)
+coroutine.yield("</li>\
+    ")
+end
+coroutine.yield("    </ol>\
 </body>\
 </html>\
 ")]],
