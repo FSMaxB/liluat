@@ -35,6 +35,29 @@ local function clone_table(table)
 end
 liluat.private.clone_table = clone_table
 
+-- recursively merge two tables, the second one has precedence
+local function merge_tables(a, b)
+	a = a or {}
+	b = b or {}
+
+	local merged = clone_table(a)
+
+	for key, value in pairs(b) do
+		if type(value) == "table" then
+			if a[key] then
+				merged[key] = merge_tables(a[key], value)
+			else
+				merged[key] = clone_table(value)
+			end
+		else
+			merged[key] = value
+		end
+	end
+
+	return merged
+end
+liluat.private.merge_tables = merge_tables
+
 -- initialise table of options (use the provided, default otherwise)
 local function initialise_options(options)
 	options = options or {}
@@ -98,29 +121,6 @@ local function read_entire_file(path)
 	return file_content
 end
 liluat.private.read_entire_file = read_entire_file
-
--- recursively merge two tables, the second one has precedence
-local function merge_tables(a, b)
-	a = a or {}
-	b = b or {}
-
-	local merged = clone_table(a)
-
-	for key, value in pairs(b) do
-		if type(value) == "table" then
-			if a[key] then
-				merged[key] = merge_tables(a[key], value)
-			else
-				merged[key] = clone_table(value)
-			end
-		else
-			merged[key] = value
-		end
-	end
-
-	return merged
-end
-liluat.private.merge_tables = merge_tables
 
 -- a whitelist of allowed functions
 local sandbox_whitelist = {
