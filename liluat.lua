@@ -62,7 +62,8 @@ local default_options = {
 	start_tag = "#{",
 	end_tag = "}#",
 	template_name = "default_name",
-	trim_right = "code"
+	trim_right = "code",
+	trim_left = false
 }
 
 -- initialise table of options (use the provided, default otherwise)
@@ -306,7 +307,7 @@ function liluat.loadstring(template, template_name, options, path)
 			table.insert(lua_code, chunk.text:match(code_pattern))
 		else --text chunk
 			-- determine if this block needs to be trimmed right
-			-- (strip newline
+			-- (strip newline)
 			local trim_right = false
 			if options.trim_right == "all" then
 				trim_right = true
@@ -316,7 +317,33 @@ function liluat.loadstring(template, template_name, options, path)
 				trim_right = lexed_template[i - 1] and (lexed_template[i - 1].type == "expression")
 			end
 
-			if trim_right then
+			-- determine if this block needs to be trimmed left
+			-- (strip whitespaces in front)
+			local trim_left = false
+			if options.trim_left == "all" then
+				trim_left = true
+			elseif options.trim_left == "code" then
+				trim_left = lexed_template[i + 1] and (lexed_template[i + 1].type == "code")
+			elseif options.trim_left == "expression" then
+				trim_left = lexed_template[i + 1] and (lexed_template[i + 1].type == "expression")
+			end
+
+			if trim_right and trim_left then
+				-- both at once
+				if chunk.text:find("^\n") then --have to trim a newline
+					if chunk.text:find("^\n.*\n") then --at least two newlines
+						chunk.text = chunk.text:match("^\n(.*\n)%s-$")
+					elseif chunk.text:find("^\n%s-$") then
+						chunk.text = ""
+					else
+						chunk.text = chunk.text:gsub("^\n", "")
+					end
+				else
+					chunk.text = chunk.text:match("^(.*\n)%s-$") or chunk.text
+				end
+			elseif trim_left then
+				chunk.text = chunk.text:match("^(.*\n)%s-$") or chunk.text
+			elseif trim_right then
 				chunk.text = chunk.text:gsub("^\n", "")
 			end
 			if not (chunk.text == "") then

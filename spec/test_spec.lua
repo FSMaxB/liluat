@@ -594,6 +594,193 @@ some text")]]
 			assert.same(expected_output, liluat.loadstring(template, nil, options))
 
 		end)
+
+		it("should trim all spaces in front of template blocks if told so", function ()
+			local options = {
+				trim_left = "all",
+				trim_right = false
+			}
+			local template = [[
+some text
+ 	#{for i = 1, 5 do}#
+
+	#{= i}#
+ #{end}#
+some more text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield("\
+\
+")
+coroutine.yield( i)
+coroutine.yield("\
+")
+end
+coroutine.yield("\
+some more text")]]
+			}
+
+			local output = liluat.loadstring(template, nil, options)
+			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
+
+			assert.same(expected_output, output)
+		end)
+
+		it("should trim all spaces in front of expressions if told so", function ()
+			local options = {
+				trim_left = "expression",
+				trim_right = false
+			}
+			local template = [[
+some text
+ 	#{for i = 1, 5 do}#
+	#{= i}#
+ #{end}#
+some more text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+ 	")
+for i = 1, 5 do
+coroutine.yield("\
+")
+coroutine.yield( i)
+coroutine.yield("\
+ ")
+end
+coroutine.yield("\
+some more text")]]
+			}
+
+			local output = liluat.loadstring(template, nil, options)
+			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
+
+			assert.same(expected_output, output)
+		end)
+
+		it("should trim all spaces in front of code if told so", function ()
+			local options = {
+				trim_left = "code",
+				trim_right = false
+			}
+			local template = [[
+some text
+ 	#{for i = 1, 5 do}#
+	#{= i}#
+ #{end}#
+some more text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield("\
+	")
+coroutine.yield( i)
+coroutine.yield("\
+")
+end
+coroutine.yield("\
+some more text")]]
+			}
+
+			local output = liluat.loadstring(template, nil, options)
+			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
+
+			assert.same(expected_output, output)
+		end)
+
+		it("shouldn't trim spaces if told so", function ()
+			local options = {
+				trim_left = false,
+				trim_right = false
+			}
+			local template = [[
+some text
+ 	#{for i = 1, 5 do}#
+	#{= i}#
+ #{end}#
+some more text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+ 	")
+for i = 1, 5 do
+coroutine.yield("\
+	")
+coroutine.yield( i)
+coroutine.yield("\
+ ")
+end
+coroutine.yield("\
+some more text")]]
+			}
+
+			local output = liluat.loadstring(template, nil, options)
+			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
+
+
+			assert.same(expected_output, output)
+		end)
+
+		it("should trim both spaces and trailing newlines if told so", function ()
+			local options = {
+				trim_left = "all",
+				trim_right = "all"
+			}
+
+			local template = [[
+some text
+ #{= 1}#
+ #{= 2}#
+#{= 3}#
+
+#{= 4}#
+#{= 5}# 
+
+#{= 6}# 
+#{= 7}# 
+	#{= 8}#
+more text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+coroutine.yield( 1)
+coroutine.yield( 2)
+coroutine.yield( 3)
+coroutine.yield("\
+")
+coroutine.yield( 4)
+coroutine.yield( 5)
+coroutine.yield(" \
+\
+")
+coroutine.yield( 6)
+coroutine.yield(" \
+")
+coroutine.yield( 7)
+coroutine.yield(" \
+")
+coroutine.yield( 8)
+coroutine.yield("more text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
 	end)
 
 	describe("liluat.loadfile", function ()
