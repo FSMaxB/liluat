@@ -25,6 +25,7 @@ local function initialise_options(options)
 	options.start_tag = options.start_tag or "#{"
 	options.end_tag = options.end_tag or "}#"
 	options.template_name = options.template_name or "default_name"
+	options.trim_right = (options.trim_right == nil) and false or options.trim_right
 
 	return options
 end
@@ -302,8 +303,24 @@ function liluat.loadstring(template, template_name, options, path)
 			table.insert(lua_code, output_function..'('..expression..')')
 		elseif chunk.type == "code" then
 			table.insert(lua_code, chunk.text:match(code_pattern))
-		else
-			table.insert(lua_code, output_function..'('..string.format("%q", chunk.text)..')')
+		else --text chunk
+			-- determine if this block needs to be trimmed right
+			-- (strip newline
+			local trim_right = false
+			if options.trim_right == "all" then
+				trim_right = true
+			elseif options.trim_right == "code" then
+				trim_right = lexed_template[i - 1] and (lexed_template[i - 1].type == "code")
+			elseif options.trim_right == "expression" then
+				trim_right = lexed_template[i - 1] and (lexed_template[i - 1].type == "expression")
+			end
+
+			if trim_right then
+				chunk.text = chunk.text:gsub("^\n", "")
+			end
+			if not (chunk.text == "") then
+				table.insert(lua_code, output_function..'('..string.format("%q", chunk.text)..')')
+			end
 		end
 	end
 

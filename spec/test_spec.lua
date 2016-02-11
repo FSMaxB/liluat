@@ -473,6 +473,129 @@ coroutine.yield("b")]]
 
 			assert.same(expected_output, liluat.loadstring(template, nil, options))
 		end)
+
+		it("should trim all trailing newlines if told so", function ()
+			local options = {
+				trim_right = "all"
+			}
+			local template = [[
+some text
+#{for i = 1, 5 do}#
+#{= i}#
+#{end}#
+#{-- comment}#
+some text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield( i)
+end
+-- comment
+coroutine.yield("some text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should trim trailing newlines after expressions if told so", function ()
+			local options = {
+				trim_right = "expression"
+			}
+			local template = [[
+some text
+#{for i = 1, 5 do}#
+#{= i}#
+#{end}#
+#{-- comment}#
+some text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield("\
+")
+coroutine.yield( i)
+end
+coroutine.yield("\
+")
+-- comment
+coroutine.yield("\
+some text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should trim trailing newlines after code if told so", function ()
+			local options = {
+				trim_right = "code"
+			}
+			local template = [[
+some text
+#{for i = 1, 5 do}#
+#{= i}#
+#{end}#
+#{-- comment}#
+some text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield( i)
+coroutine.yield("\
+")
+end
+-- comment
+coroutine.yield("some text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("shouldn't trim newlines if told so", function ()
+			local options = {
+				trim_right = false
+			}
+			local template = [[
+some text
+#{for i = 1, 5 do}#
+#{= i}#
+#{end}#
+#{-- comment}#
+some text]]
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = [[
+coroutine.yield("some text\
+")
+for i = 1, 5 do
+coroutine.yield("\
+")
+coroutine.yield( i)
+coroutine.yield("\
+")
+end
+coroutine.yield("\
+")
+-- comment
+coroutine.yield("\
+some text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+
+		end)
 	end)
 
 	describe("liluat.loadfile", function ()
