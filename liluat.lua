@@ -58,15 +58,16 @@ local function merge_tables(a, b)
 end
 liluat.private.merge_tables = merge_tables
 
+local default_options = {
+	start_tag = "#{",
+	end_tag = "}#",
+	template_name = "default_name",
+	trim_right = false
+}
+
 -- initialise table of options (use the provided, default otherwise)
 local function initialise_options(options)
-	options = options or {}
-	options.start_tag = options.start_tag or "#{"
-	options.end_tag = options.end_tag or "}#"
-	options.template_name = options.template_name or "default_name"
-	options.trim_right = (options.trim_right == nil) and false or options.trim_right
-
-	return options
+	return merge_tables(default_options, options)
 end
 
 -- creates an iterator that iterates over all chunks in the given template
