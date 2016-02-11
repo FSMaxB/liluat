@@ -19,6 +19,22 @@ local function escape_pattern(text)
 end
 liluat.private.escape_pattern = escape_pattern
 
+-- recursively copy a table
+local function clone_table(table)
+	local clone = {}
+
+	for key, value in pairs(table) do
+		if type(value) == "table" then
+			clone[key] = clone_table(value)
+		else
+			clone[key] = value
+		end
+	end
+
+	return clone
+end
+liluat.private.clone_table = clone_table
+
 -- initialise table of options (use the provided, default otherwise)
 local function initialise_options(options)
 	options = options or {}
@@ -82,22 +98,6 @@ local function read_entire_file(path)
 	return file_content
 end
 liluat.private.read_entire_file = read_entire_file
-
--- recursively copy a table
-local function clone_table(table)
-	local clone = {}
-
-	for key, value in pairs(table) do
-		if type(value) == "table" then
-			clone[key] = clone_table(value)
-		else
-			clone[key] = value
-		end
-	end
-
-	return clone
-end
-liluat.private.clone_table = clone_table
 
 -- recursively merge two tables, the second one has precedence
 local function merge_tables(a, b)
