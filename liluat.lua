@@ -78,9 +78,9 @@ local function all_chunks(template, options)
 	options = initialise_options(options)
 
 	-- pattern to match a template chunk
-	local template_pattern = escape_pattern(options.start_tag) .. "(.-)" .. escape_pattern(options.end_tag)
-	local include_pattern = "^"..escape_pattern(options.start_tag) .. "include:(.-)" .. escape_pattern(options.end_tag)
-	local expression_pattern = "^"..escape_pattern(options.start_tag) .. "=(.-)" .. escape_pattern(options.end_tag)
+	local template_pattern = escape_pattern(options.start_tag) .. "([+-]?)(.-)([+-]?)" .. escape_pattern(options.end_tag)
+	local include_pattern = "^"..escape_pattern(options.start_tag) .. "[+-]?include:(.-)[+-]?" .. escape_pattern(options.end_tag)
+	local expression_pattern = "^"..escape_pattern(options.start_tag) .. "[+-]?=(.-)[+-]?" .. escape_pattern(options.end_tag)
 	local position = 1
 
 	return function ()
@@ -88,9 +88,21 @@ local function all_chunks(template, options)
 			return nil
 		end
 
-		local template_start, template_end, template_capture = template:find(template_pattern, position)
+		local template_start, template_end, trim_left, template_capture, trim_right = template:find(template_pattern, position)
+
 		local chunk = {}
 		if template_start == position then -- next chunk is a template chunk
+			if trim_left == "+" then
+				chunk.trim_left = false
+			elseif trim_left == "-" then
+				chunk.trim_left = true
+			end
+			if trim_right == "+" then
+				chunk.trim_right = false
+			elseif trim_right == "-" then
+				chunk.trim_right = true
+			end
+
 			local include_start, include_end, include_capture = template:find(include_pattern, position)
 			local expression_start, expression_end, expression_capture
 			if not include_start then
@@ -319,7 +331,11 @@ function liluat.loadstring(template, template_name, options, path)
 			-- determine if this block needs to be trimmed right
 			-- (strip newline)
 			local trim_right = false
-			if options.trim_right == "all" then
+			if lexed_template[i - 1] and (lexed_template[i - 1].trim_right == true) then
+				trim_right = true
+			elseif lexed_template[i - 1] and (lexed_template[i - 1].trim_right == false) then
+				trim_right = false
+			elseif options.trim_right == "all" then
 				trim_right = true
 			elseif options.trim_right == "code" then
 				trim_right = lexed_template[i - 1] and (lexed_template[i - 1].type == "code")
@@ -330,7 +346,11 @@ function liluat.loadstring(template, template_name, options, path)
 			-- determine if this block needs to be trimmed left
 			-- (strip whitespaces in front)
 			local trim_left = false
-			if options.trim_left == "all" then
+			if lexed_template[i + 1] and (lexed_template[i + 1].trim_left == true) then
+				trim_left = true
+			elseif lexed_template[i + 1] and (lexed_template[i + 1].trim_left == false) then
+				trim_left = false
+			elseif options.trim_left == "all" then
 				trim_left = true
 			elseif options.trim_left == "code" then
 				trim_left = lexed_template[i + 1] and (lexed_template[i + 1].type == "code")
@@ -340,7 +360,13 @@ function liluat.loadstring(template, template_name, options, path)
 
 			if trim_right and trim_left then
 				-- both at once
-				if chunk.text:find("^\n") then --have to trim a newline
+				if i == 1 then
+					if chunk.text:find("^.*\n") then
+						chunk.text = chunk.text:match("^(.*\n)%s-$")
+					elseif chunk.text:find("^%s-$") then
+						chunk.text = ""
+					end
+				elseif chunk.text:find("^\n") then --have to trim a newline
 					if chunk.text:find("^\n.*\n") then --at least two newlines
 						chunk.text = chunk.text:match("^\n(.*\n)%s-$")
 					elseif chunk.text:find("^\n%s-$") then
@@ -352,7 +378,11 @@ function liluat.loadstring(template, template_name, options, path)
 					chunk.text = chunk.text:match("^(.*\n)%s-$") or chunk.text
 				end
 			elseif trim_left then
-				chunk.text = chunk.text:match("^(.*\n)%s-$") or chunk.text
+				if i == 1 and chunk.text:find("^%s-$") then
+					chunk.text = ""
+				else
+					chunk.text = chunk.text:match("^(.*\n)%s-$") or chunk.text
+				end
 			elseif trim_right then
 				chunk.text = chunk.text:gsub("^\n", "")
 			end

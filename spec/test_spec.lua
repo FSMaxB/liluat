@@ -190,6 +190,126 @@ some more text]]
 
 			assert.same(expected_output, result)
 		end)
+
+		it("should detect manual trim_left", function ()
+			local template = "\t#{-code}#"
+
+			local chunks = {}
+			for chunk in liluat.private.all_chunks(template) do
+				table.insert(chunks, chunk)
+			end
+
+			local expected_output = {
+				{
+					text = "\t",
+					type = "text"
+				},
+				{
+					text = "code",
+					type = "code",
+					trim_left = true
+				}
+			}
+
+			assert.same(expected_output, chunks)
+		end)
+
+		it("should detect manually disabled trim left", function ()
+			local template = "\t#{+code}#"
+
+			local chunks = {}
+			for chunk in liluat.private.all_chunks(template) do
+				table.insert(chunks, chunk)
+			end
+
+			local expected_output = {
+				{
+					text = "\t",
+					type = "text"
+				},
+				{
+					text = "code",
+					type = "code",
+					trim_left = false
+				}
+			}
+
+			assert.same(expected_output, chunks)
+		end)
+
+		it("should detect manual trim_right", function ()
+			local template = "#{code-}#\n"
+
+			local chunks = {}
+			for chunk in liluat.private.all_chunks(template) do
+				table.insert(chunks, chunk)
+			end
+
+			local expected_output = {
+				{
+					text = "code",
+					type = "code",
+					trim_right = true
+				},
+				{
+					text = "\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, chunks)
+		end)
+
+		it("should detect manually disabled trim_right", function ()
+			local template = "#{code+}#\n"
+
+			local chunks = {}
+			for chunk in liluat.private.all_chunks(template) do
+				table.insert(chunks, chunk)
+			end
+
+			local expected_output = {
+				{
+					text = "code",
+					type = "code",
+					trim_right = false
+				},
+				{
+					text = "\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, chunks)
+		end)
+
+		it("should detect manual trim_left and trim_right", function ()
+			local template = "\t#{-code-}#\n"
+
+			local chunks = {}
+			for chunk in liluat.private.all_chunks(template) do
+				table.insert(chunks, chunk)
+			end
+
+			local expected_output = {
+				{
+					text = "\t",
+					type = "text"
+				},
+				{
+					text = "code",
+					type = "code",
+					trim_right = true,
+					trim_left = true
+				},
+				{
+					text = "\n",
+					type = "text"
+				}
+			}
+
+			assert.same(expected_output, chunks)
+		end)
 	end)
 
 	describe("read_entire_file", function ()
@@ -275,14 +395,14 @@ another line]]
 		end)
 
 		it("should work with other start and end tags", function ()
-			local template = "text {%--template%} more text"
+			local template = "text {% --template%} more text"
 			local expected_output = {
 				{
 					text = "text ",
 					type = "text"
 				},
 				{
-					text = "--template",
+					text = " --template",
 					type = "code"
 				},
 				{
@@ -481,7 +601,7 @@ some text
 #{for i = 1, 5 do}#
 #{= i}#
 #{end}#
-#{-- comment}#
+#{ -- comment}#
 some text]]
 
 			local expected_output = {
@@ -492,7 +612,7 @@ coroutine.yield("some text\
 for i = 1, 5 do
 coroutine.yield( i)
 end
--- comment
+ -- comment
 coroutine.yield("some text")]]
 			}
 
@@ -508,7 +628,7 @@ some text
 #{for i = 1, 5 do}#
 #{= i}#
 #{end}#
-#{-- comment}#
+#{ -- comment}#
 some text]]
 
 			local expected_output = {
@@ -523,7 +643,7 @@ coroutine.yield( i)
 end
 coroutine.yield("\
 ")
--- comment
+ -- comment
 coroutine.yield("\
 some text")]]
 			}
@@ -540,7 +660,7 @@ some text
 #{for i = 1, 5 do}#
 #{= i}#
 #{end}#
-#{-- comment}#
+#{ -- comment}#
 some text]]
 
 			local expected_output = {
@@ -553,7 +673,7 @@ coroutine.yield( i)
 coroutine.yield("\
 ")
 end
--- comment
+ -- comment
 coroutine.yield("some text")]]
 			}
 
@@ -569,7 +689,7 @@ some text
 #{for i = 1, 5 do}#
 #{= i}#
 #{end}#
-#{-- comment}#
+#{ -- comment}#
 some text]]
 
 			local expected_output = {
@@ -586,7 +706,7 @@ coroutine.yield("\
 end
 coroutine.yield("\
 ")
--- comment
+ -- comment
 coroutine.yield("\
 some text")]]
 			}
@@ -777,6 +897,113 @@ coroutine.yield(" \
 ")
 coroutine.yield( 8)
 coroutine.yield("more text")]]
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should trim left in the first line", function ()
+			local template = "\t#{code}#"
+
+			local options = {
+				trim_left = "all"
+			}
+
+			local expected_output = {
+				name = "=(liluat.loadstring)",
+				code = "code"
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_left (force trim)", function ()
+			local template = "\t#{-code}#"
+
+			local expected_output = {
+				code = "code",
+				name = "=(liluat.loadstring)"
+			}
+
+			local options = {
+				trim_left = false
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_left (force no trim)", function()
+			local template = "  #{+code}#"
+
+			local expected_output = {
+				code = 'coroutine.yield("  ")\ncode',
+				name = "=(liluat.loadstring)"
+			}
+
+			local options = {
+				trim_left = "all"
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_right (force trim)", function ()
+			local template = "#{code-}#\n"
+
+			local options = {
+				trim_left = false
+			}
+
+			local expected_output =  {
+				code = "code",
+				name = "=(liluat.loadstring)"
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_right (force no trim)", function ()
+			local template = "#{code+}#\n"
+
+			local options = {
+				trim_left = "all"
+			}
+
+			local expected_output =  {
+				code = 'code\ncoroutine.yield("\\\n")',
+				name = "=(liluat.loadstring)"
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_left and trim_right (force trim)", function ()
+			local template = "  #{-code-}#\n"
+
+			local options = {
+				trim_left = false,
+				trim_right = false
+			}
+
+			local expected_output = {
+				code = 'code',
+				name = "=(liluat.loadstring)"
+			}
+
+			assert.same(expected_output, liluat.loadstring(template, nil, options))
+		end)
+
+		it("should locally override trim_left and trim_right (force no trim)", function ()
+			local template = "  #{+code+}#\n"
+
+			local options = {
+				trim_left = "all",
+				trim_right = "all"
+			}
+
+			local expected_output = {
+				code = 'coroutine.yield("  ")\ncode\ncoroutine.yield("\\\n")',
+				name = "=(liluat.loadstring)"
 			}
 
 			assert.same(expected_output, liluat.loadstring(template, nil, options))
