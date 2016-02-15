@@ -143,7 +143,7 @@ some more text]]
 
 			local expected_output = {
 				{
-					text = "#{= expression}#",
+					text = " expression",
 					type = "expression"
 				},
 				{
@@ -151,7 +151,7 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{code}#",
+					text = "code",
 					type = "code"
 				},
 				{
@@ -159,7 +159,7 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{other code}#",
+					text = "other code",
 					type = "code"
 				},
 				{
@@ -167,11 +167,11 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{more code}#",
+					text = "more code",
 					type = "code"
 				},
 				{
-					text = "#{}#",
+					text = "",
 					type = "code"
 				},
 				{
@@ -179,7 +179,7 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = '#{include: "bla"}#',
+					text = ' "bla"',
 					type = "include"
 				},
 				{
@@ -218,7 +218,7 @@ some more text]]
 
 			local expected_output = {
 				{
-					text = "#{= expression}#",
+					text = " expression",
 					type = "expression"
 				},
 				{
@@ -226,7 +226,7 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{code}#",
+					text = "code",
 					type = "code"
 				},
 				{
@@ -234,7 +234,7 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{other code}#",
+					text = "other code",
 					type = "code"
 				},
 				{
@@ -242,11 +242,11 @@ some more text]]
 					type = "text"
 				},
 				{
-					text = "#{more code}#",
+					text = "more code",
 					type = "code"
 				},
 				{
-					text = "#{}#",
+					text = "",
 					type = "code"
 				},
 				{
@@ -282,7 +282,7 @@ another line]]
 					type = "text"
 				},
 				{
-					text = "{%--template%}",
+					text = "--template",
 					type = "code"
 				},
 				{
@@ -307,7 +307,7 @@ another line]]
 					type = "text"
 				},
 				{
-					text = "{{= 5}}",
+					text = " 5",
 					type = "expression"
 				},
 				{

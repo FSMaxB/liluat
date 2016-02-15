@@ -99,13 +99,13 @@ local function all_chunks(template, options)
 
 			if include_start then
 				chunk.type = "include"
-				chunk.text = options.start_tag.."include:"..include_capture..options.end_tag
+				chunk.text = include_capture
 			elseif expression_start then
 				chunk.type = "expression"
-				chunk.text = options.start_tag.."="..expression_capture..options.end_tag
+				chunk.text = expression_capture
 			else
 				chunk.type = "code"
-				chunk.text = options.start_tag..template_capture..options.end_tag
+				chunk.text = template_capture
 			end
 
 			position = template_end + 1
@@ -222,12 +222,11 @@ function liluat.lex(template, options, output, include_list, current_path)
 
 	include_list = include_list or {} -- a list of files that were included
 	local output = output or {}
-	local include_pattern = "^" .. escape_pattern(options.start_tag) .. "include:(.-)" .. escape_pattern(options.end_tag)
 
 	for chunk in all_chunks(template, options) do
 		-- handle includes
 		if chunk.type == "include" then -- include chunk
-			local include_path_literal = chunk.text:match(include_pattern)
+			local include_path_literal = chunk.text
 			local path = parse_string_literal(include_path_literal)
 
 			-- build complete path
@@ -262,7 +261,13 @@ function liluat.precompile(template, options, path)
 
 	local output = ""
 	for _,chunk in ipairs(liluat.lex(template, options, nil, nil, path)) do
-		output = output .. chunk.text
+		if chunk.type == "expression" then
+			output = output .. options.start_tag .. "=" .. chunk.text .. options.end_tag
+		elseif chunk.type == "code" then
+			output = output .. options.start_tag .. chunk.text .. options.end_tag
+		else
+			output = output .. chunk.text
+		end
 	end
 
 	return output
@@ -301,20 +306,15 @@ function liluat.loadstring(template, template_name, options, path)
 	-- split the template string into chunks
 	local lexed_template = liluat.lex(template, options, nil, nil, path)
 
-	-- pattern to match different kinds of templates
-	local expression_pattern = escape_pattern(options.start_tag) .. "=(.-)" .. escape_pattern(options.end_tag)
-	local code_pattern = escape_pattern(options.start_tag) .. "([^=].-)" .. escape_pattern(options.end_tag)
-
 	-- table of code fragments the template is compiled into
 	local lua_code = {}
 
 	for i, chunk in ipairs(lexed_template) do
 		-- check if the chunk is a template (either code or expression)
 		if chunk.type == "expression" then
-			local expression = chunk.text:match(expression_pattern)
-			table.insert(lua_code, output_function..'('..expression..')')
+			table.insert(lua_code, output_function..'('..chunk.text..')')
 		elseif chunk.type == "code" then
-			table.insert(lua_code, chunk.text:match(code_pattern))
+			table.insert(lua_code, chunk.text)
 		else --text chunk
 			-- determine if this block needs to be trimmed right
 			-- (strip newline)
