@@ -78,9 +78,9 @@ local function all_chunks(template, options)
 	options = initialise_options(options)
 
 	-- pattern to match a template chunk
-	local template_pattern = escape_pattern(options.start_tag) .. ".-" .. escape_pattern(options.end_tag)
-	local include_pattern = escape_pattern(options.start_tag) .. "include:.-" .. escape_pattern(options.end_tag)
-	local expression_pattern = escape_pattern(options.start_tag) .. "=.-" .. escape_pattern(options.end_tag)
+	local template_pattern = escape_pattern(options.start_tag) .. "(.-)" .. escape_pattern(options.end_tag)
+	local include_pattern = "^"..escape_pattern(options.start_tag) .. "include:(.-)" .. escape_pattern(options.end_tag)
+	local expression_pattern = "^"..escape_pattern(options.start_tag) .. "=(.-)" .. escape_pattern(options.end_tag)
 	local position = 1
 
 	return function ()
@@ -88,28 +88,38 @@ local function all_chunks(template, options)
 			return nil
 		end
 
-		local template_start, template_end = template:find(template_pattern, position)
-		local chunk_type --type of the chunk (text, code, expression, include)
-
+		local template_start, template_end, template_capture = template:find(template_pattern, position)
+		local chunk = {}
 		if template_start == position then -- next chunk is a template chunk
-			if template_start == template:find(include_pattern, position) then
-				chunk_type = "include"
-			elseif template_start == template:find(expression_pattern, position) then
-				chunk_type = "expression"
+			local include_start, include_end, include_capture = template:find(include_pattern, position)
+			local expression_start, expression_end, expression_capture
+			if not include_start then
+				expression_start, expression_end, expression_capture = template:find(expression_pattern, position)
+			end
+
+			if include_start then
+				chunk.type = "include"
+				chunk.text = options.start_tag.."include:"..include_capture..options.end_tag
+			elseif expression_start then
+				chunk.type = "expression"
+				chunk.text = options.start_tag.."="..expression_capture..options.end_tag
 			else
-				chunk_type = "code"
+				chunk.type = "code"
+				chunk.text = options.start_tag..template_capture..options.end_tag
 			end
 
 			position = template_end + 1
-			return {text = template:sub(template_start, template_end), type = chunk_type }
+			return chunk
 		elseif template_start then -- next chunk is a text chunk
-			local chunk = template:sub(position, template_start - 1)
+			chunk.type = "text"
+			chunk.text = template:sub(position, template_start - 1)
 			position = template_start
-			return {text = chunk, type = "text"}
+			return chunk
 		else -- no template chunk found --> either text chunk until end of file or no chunk at all
-			chunk = template:sub(position)
+			chunk.text = template:sub(position)
+			chunk.type = "text"
 			position = nil
-			return (#chunk > 0) and {text = chunk, type = "text"} or nil
+			return (#chunk.text > 0) and chunk or nil
 		end
 	end
 end
