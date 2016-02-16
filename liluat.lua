@@ -332,10 +332,11 @@ function liluat.get_dependencies(template, options)
 	return dependencies
 end
 
+-- compile a template into lua code
 -- @return { name = string, code = string / function}
-function liluat.loadstring(template, options, template_name, start_path)
+function liluat.compile(template, options, template_name, start_path)
 	options = initialise_options(options)
-	options.template_name = template_name or '=(liluat.loadstring)'
+	options.template_name = template_name or 'liluat.compile'
 
 	local output_function = "coroutine.yield"
 
@@ -424,7 +425,7 @@ end
 
 -- @return { name = string, code = string / function }
 function liluat.loadfile(filename, options)
-	return liluat.loadstring(read_entire_file(filename), options, filename, filename)
+	return liluat.compile(read_entire_file(filename), options, filename, filename)
 end
 
 -- @return a coroutine function

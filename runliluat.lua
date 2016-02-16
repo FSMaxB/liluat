@@ -236,6 +236,6 @@ end
 if template_path then
 	write_out(liluat.render(liluat.loadfile(template_path, options), values))
 else
-	write_out(liluat.render(liluat.loadstring(template, options, template_name, path), values))
+	write_out(liluat.render(liluat.compile(template, options, template_name, path), values))
 end
 os.exit(0)
