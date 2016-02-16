@@ -423,8 +423,9 @@ function liluat.compile(template, options, template_name, start_path)
 	}
 end
 
+-- compile a file
 -- @return { name = string, code = string / function }
-function liluat.loadfile(filename, options)
+function liluat.compile_file(filename, options)
 	return liluat.compile(read_entire_file(filename), options, filename, filename)
 end
 

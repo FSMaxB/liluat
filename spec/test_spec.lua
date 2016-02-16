@@ -1033,12 +1033,12 @@ coroutine.yield("more text")]]
 		end)
 	end)
 
-	describe("liluat.loadfile", function ()
+	describe("liluat.compile_file", function ()
 		it("should load a template file", function ()
 			local template_path = "spec/index.html.template"
 			local expected_output = loadfile("spec/index.html.template.lua")()
 
-			assert.same(expected_output, liluat.loadfile(template_path))
+			assert.same(expected_output, liluat.compile_file(template_path))
 		end)
 
 		it("should accept different tags via the options", function ()
@@ -1049,7 +1049,7 @@ coroutine.yield("more text")]]
 			}
 			local expected_output = loadfile("spec/jinja.template.lua")()
 
-			assert.same(expected_output, liluat.loadfile(template_path, options))
+			assert.same(expected_output, liluat.compile_file(template_path, options))
 		end)
 	end)
 
