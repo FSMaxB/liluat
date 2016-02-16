@@ -30,6 +30,11 @@ local liluat = {
 	private = {} --used to expose private functions for testing
 }
 
+-- print the current version
+liluat.version = function ()
+	return "0.99-beta"
+end
+
 -- escape a string for use in lua patterns
 -- (this simply prepends all non alphanumeric characters with '%'
 local function escape_pattern(text)

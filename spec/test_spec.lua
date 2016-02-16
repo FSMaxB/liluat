@@ -1152,4 +1152,10 @@ coroutine.yield("more text")]]
 			assert.equal("", liluat.private.dirname("."))
 		end)
 	end)
+
+	describe("version", function ()
+		it("should return the current version number", function ()
+			assert.equal("0.99-beta", liluat.version())
+		end)
+	end)
 end)
