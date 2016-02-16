@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>#{= title}#</title>
+    <title>{{= title}}</title>
 </head>
 <body>
-    #{include: "content.html.template"}#
+    {{include: "content.html.template"}}
     <ol>
-    #{for i = 1, 5 do}#
-        <li>#{= i}#</li>
-    #{end}#
+    {{for i = 1, 5 do}}
+        <li>{{= i}}</li>
+    {{end}}
     </ol>
 </body>
 </html>

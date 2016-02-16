@@ -82,8 +82,8 @@ end
 liluat.private.merge_tables = merge_tables
 
 local default_options = {
-	start_tag = "#{",
-	end_tag = "}#",
+	start_tag = "{{",
+	end_tag = "}}",
 	template_name = "default_name",
 	trim_right = "code",
 	trim_left = "code"

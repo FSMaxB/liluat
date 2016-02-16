@@ -30,11 +30,11 @@ describe("liluat", function ()
 
 	it("should render some example template", function ()
 		local tmpl = liluat.loadstring([[<span>
-#{ if user ~= nil then }#
-Hello, #{= escapeHTML(user.name) }#!
-#{ else }#
+{{ if user ~= nil then }}
+Hello, {{= escapeHTML(user.name) }}!
+{{ else }}
 <a href="/login">login</a>
-#{ end }#
+{{ end }}
 </span>
 ]])
 
@@ -153,10 +153,10 @@ Hello, &lt;world&gt;!
 	describe("all_chunks", function ()
 		it("should iterate over all chunks", function ()
 			local template = [[
-#{= expression}# bla #{code}#
- #{other code}# some text
-#{more code}##{}#
-#{include: "bla"}#
+{{= expression}} bla {{code}}
+ {{other code}} some text
+{{more code}}{{}}
+{{include: "bla"}}
 some more text]]
 			local result = {}
 
@@ -215,7 +215,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_left", function ()
-			local template = "\t#{-code}#"
+			local template = "\t{{-code}}"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -238,7 +238,7 @@ some more text]]
 		end)
 
 		it("should detect manually disabled trim left", function ()
-			local template = "\t#{+code}#"
+			local template = "\t{{+code}}"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -261,7 +261,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_right", function ()
-			local template = "#{code-}#\n"
+			local template = "{{code-}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -284,7 +284,7 @@ some more text]]
 		end)
 
 		it("should detect manually disabled trim_right", function ()
-			local template = "#{code+}#\n"
+			local template = "{{code+}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -307,7 +307,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_left and trim_right", function ()
-			local template = "\t#{-code-}#\n"
+			local template = "\t{{-code-}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -354,9 +354,9 @@ some more text]]
 	describe("liluat.lex", function ()
 		it("should create a list of chunks", function ()
 			local template = [[
-#{= expression}# bla #{code}#
- #{other code}# some text
-#{more code}##{}#
+{{= expression}} bla {{code}}
+ {{other code}} some text
+{{more code}}{{}}
 some more text]]
 
 			local expected_output = {
@@ -404,7 +404,7 @@ some more text]]
 		it("should include files", function ()
 			local template = [[
 first line
-#{include: "spec/read_entire_file-test"}#
+{{include: "spec/read_entire_file-test"}}
 another line]]
 
 			local expected_output = {
@@ -470,7 +470,7 @@ another line]]
 		end)
 
 		it("should detect cyclic inclusions", function ()
-			local template = "#{include: 'spec/cycle_a.template'}#"
+			local template = "{{include: 'spec/cycle_a.template'}}"
 
 			assert.has_error(
 				function ()
@@ -480,7 +480,7 @@ another line]]
 		end)
 
 		it("should not create two or more text chunks in a row", function ()
-			local template = 'text#{include: "spec/content.html.template"}#more text'
+			local template = 'text{{include: "spec/content.html.template"}}more text'
 
 			local expected_output = {
 				{
@@ -573,7 +573,7 @@ another line]]
 
 	describe("liluat.loadstring", function ()
 		it("should compile templates into code", function ()
-			local template = "a#{i = 0}##{= i}#b"
+			local template = "a{{i = 0}}{{= i}}b"
 			local expected_output = {
 				name = "=(liluat.loadstring)",
 				code = [[
@@ -621,10 +621,10 @@ coroutine.yield("b")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
@@ -648,10 +648,10 @@ coroutine.yield("some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
@@ -680,10 +680,10 @@ some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
@@ -709,10 +709,10 @@ coroutine.yield("some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
@@ -745,10 +745,10 @@ some text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
+ 	{{for i = 1, 5 do}}
 
-	#{= i}#
- #{end}#
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
@@ -781,9 +781,9 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
@@ -815,9 +815,9 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
@@ -849,9 +849,9 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
@@ -885,16 +885,16 @@ some more text")]]
 
 			local template = [[
 some text
- #{= 1}#
- #{= 2}#
-#{= 3}#
+ {{= 1}}
+ {{= 2}}
+{{= 3}}
 
-#{= 4}#
-#{= 5}# 
+{{= 4}}
+{{= 5}} 
 
-#{= 6}# 
-#{= 7}# 
-	#{= 8}#
+{{= 6}} 
+{{= 7}} 
+	{{= 8}}
 more text]]
 
 			local expected_output = {
@@ -926,7 +926,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should trim left in the first line", function ()
-			local template = "\t#{code}#"
+			local template = "\t{{code}}"
 
 			local options = {
 				trim_left = "all"
@@ -941,7 +941,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_left (force trim)", function ()
-			local template = "\t#{-code}#"
+			local template = "\t{{-code}}"
 
 			local expected_output = {
 				code = "code",
@@ -956,7 +956,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_left (force no trim)", function()
-			local template = "  #{+code}#"
+			local template = "  {{+code}}"
 
 			local expected_output = {
 				code = 'coroutine.yield("  ")\ncode',
@@ -971,7 +971,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_right (force trim)", function ()
-			local template = "#{code-}#\n"
+			local template = "{{code-}}\n"
 
 			local options = {
 				trim_left = false
@@ -986,7 +986,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_right (force no trim)", function ()
-			local template = "#{code+}#\n"
+			local template = "{{code+}}\n"
 
 			local options = {
 				trim_left = "all"
@@ -1001,7 +1001,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_left and trim_right (force trim)", function ()
-			local template = "  #{-code-}#\n"
+			local template = "  {{-code-}}\n"
 
 			local options = {
 				trim_left = false,
@@ -1017,7 +1017,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should locally override trim_left and trim_right (force no trim)", function ()
-			local template = "  #{+code+}#\n"
+			local template = "  {{+code+}}\n"
 
 			local options = {
 				trim_left = "all",
@@ -1055,7 +1055,7 @@ coroutine.yield("more text")]]
 
 	describe("get_dependency", function ()
 		it("should list all includes", function ()
-			local template = '#{include: "spec/index.html.template"}#'
+			local template = '{{include: "spec/index.html.template"}}'
 			local expected_output = {
 				"spec/index.html.template",
 				"spec/content.html.template"
@@ -1065,7 +1065,7 @@ coroutine.yield("more text")]]
 		end)
 
 		it("should list every file only once", function ()
-			local template = '#{include: "spec/index.html.template"}##{include: "spec/index.html.template"}#'
+			local template = '{{include: "spec/index.html.template"}}{{include: "spec/index.html.template"}}'
 			local expected_output = {
 				"spec/index.html.template",
 				"spec/content.html.template"
