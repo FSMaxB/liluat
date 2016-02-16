@@ -428,14 +428,14 @@ function liluat.loadfile(filename, options)
 end
 
 -- @return a coroutine function
-function liluat.render_co(template, environment)
+function liluat.render_coroutine(template, environment)
 	return sandbox(template.code, template.name, environment)
 end
 
 -- @return string
 function liluat.render(t, env)
 	local result = {}
-	local co = coroutine.create(liluat.render_co(t, env))
+	local co = coroutine.create(liluat.render_coroutine(t, env))
 	while coroutine.status(co) ~= 'dead' do
 		local ok, chunk = coroutine.resume(co)
 		if not ok then
