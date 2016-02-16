@@ -223,7 +223,7 @@ if list_dependencies then
 end
 
 if inline then
-	write_out(liluat.precompile(template, options, path))
+	write_out(liluat.inline(template, options, path))
 	os.exit(0)
 end
 

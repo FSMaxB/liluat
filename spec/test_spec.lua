@@ -1075,12 +1075,12 @@ coroutine.yield("more text")]]
 		end)
 	end)
 
-	describe("liluat.precompile", function ()
-		it("should precompile a template", function ()
+	describe("liluat.inline", function ()
+		it("should inline a template", function ()
 			local template = liluat.private.read_entire_file("spec/index.html.template")
-			local expected_output = liluat.private.read_entire_file("spec/index.html.template.precompiled")
+			local expected_output = liluat.private.read_entire_file("spec/index.html.template.inlined")
 
-			assert.equal(expected_output, liluat.precompile(template, nil, "spec/"))
+			assert.equal(expected_output, liluat.inline(template, nil, "spec/"))
 		end)
 	end)
 

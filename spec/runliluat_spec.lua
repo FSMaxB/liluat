@@ -253,7 +253,7 @@ describe("runliluat", function ()
 			local template = liluat.private.read_entire_file("spec/index.html.template")
 			local expected_output = {
 				0,
-				liluat.private.read_entire_file("spec/index.html.template.precompiled"),
+				liluat.private.read_entire_file("spec/index.html.template.inlined"),
 				""
 			}
 

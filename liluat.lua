@@ -290,9 +290,9 @@ local function parse(template, options, output, include_list, current_path)
 end
 liluat.private.parse = parse
 
--- preprocess included files
+-- inline included template files
 -- @return string
-function liluat.precompile(template, options, path)
+function liluat.inline(template, options, path)
 	options = initialise_options(options)
 
 	local output = {}
