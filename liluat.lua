@@ -4,13 +4,36 @@
 -- Project page: https://github.com/FSMaxB/liluat
 --
 -- liluat is based on slt2 by henix, see https://github.com/henix/slt2
--- @License
--- MIT License
+--
+-- Copyright © 2016 Max Bruckner
+-- Copyright © 2011-2016 henix
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is furnished
+-- to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+-- WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+-- IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
 local liluat = {
 	private = {} --used to expose private functions for testing
 }
+
+-- print the current version
+liluat.version = function ()
+	return "0.99-beta"
+end
 
 -- escape a string for use in lua patterns
 -- (this simply prepends all non alphanumeric characters with '%'
@@ -271,18 +294,18 @@ end
 function liluat.precompile(template, options, path)
 	options = initialise_options(options)
 
-	local output = ""
+	local output = {}
 	for _,chunk in ipairs(liluat.lex(template, options, nil, nil, path)) do
 		if chunk.type == "expression" then
-			output = output .. options.start_tag .. "=" .. chunk.text .. options.end_tag
+			table.insert(output, options.start_tag .. "=" .. chunk.text .. options.end_tag)
 		elseif chunk.type == "code" then
-			output = output .. options.start_tag .. chunk.text .. options.end_tag
+			table.insert(output, options.start_tag .. chunk.text .. options.end_tag)
 		else
-			output = output .. chunk.text
+			table.insert(output, chunk.text)
 		end
 	end
 
-	return output
+	return table.concat(output)
 end
 
 -- @return { string }
