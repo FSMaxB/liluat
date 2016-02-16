@@ -292,11 +292,11 @@ liluat.private.parse = parse
 
 -- inline included template files
 -- @return string
-function liluat.inline(template, options, path)
+function liluat.inline(template, options, start_path)
 	options = initialise_options(options)
 
 	local output = {}
-	for _,chunk in ipairs(parse(template, options, nil, nil, path)) do
+	for _,chunk in ipairs(parse(template, options, nil, nil, start_path)) do
 		if chunk.type == "expression" then
 			table.insert(output, options.start_tag .. "=" .. chunk.text .. options.end_tag)
 		elseif chunk.type == "code" then
@@ -333,14 +333,14 @@ function liluat.get_dependencies(template, options)
 end
 
 -- @return { name = string, code = string / function}
-function liluat.loadstring(template, template_name, options, path)
+function liluat.loadstring(template, options, template_name, start_path)
 	options = initialise_options(options)
 	options.template_name = template_name or '=(liluat.loadstring)'
 
 	local output_function = "coroutine.yield"
 
 	-- split the template string into chunks
-	local lexed_template = parse(template, options, nil, nil, path)
+	local lexed_template = parse(template, options, nil, nil, start_path)
 
 	-- table of code fragments the template is compiled into
 	local lua_code = {}
@@ -424,7 +424,7 @@ end
 
 -- @return { name = string, code = string / function }
 function liluat.loadfile(filename, options)
-	return liluat.loadstring(read_entire_file(filename), filename, options, filename)
+	return liluat.loadstring(read_entire_file(filename), options, filename, filename)
 end
 
 -- @return a coroutine function

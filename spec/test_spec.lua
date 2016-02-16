@@ -594,7 +594,7 @@ coroutine.yield("b")]]
 				code = 'coroutine.yield("a")'
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, template_name))
+			assert.same(expected_output, liluat.loadstring(template, nil, template_name))
 		end)
 
 		it("should accept other template tags passed as options", function ()
@@ -612,7 +612,7 @@ coroutine.yield( i)
 coroutine.yield("b")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should trim all trailing newlines if told so", function ()
@@ -639,7 +639,7 @@ end
 coroutine.yield("some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should trim trailing newlines after expressions if told so", function ()
@@ -671,7 +671,7 @@ coroutine.yield("\
 some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should trim trailing newlines after code if told so", function ()
@@ -700,7 +700,7 @@ end
 coroutine.yield("some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("shouldn't trim newlines if told so", function ()
@@ -734,7 +734,7 @@ coroutine.yield("\
 some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 
 		end)
 
@@ -768,7 +768,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.loadstring(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -802,7 +802,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.loadstring(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -836,7 +836,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.loadstring(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -870,7 +870,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.loadstring(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 
@@ -922,7 +922,7 @@ coroutine.yield( 8)
 coroutine.yield("more text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should trim left in the first line", function ()
@@ -937,7 +937,7 @@ coroutine.yield("more text")]]
 				code = "code"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_left (force trim)", function ()
@@ -952,7 +952,7 @@ coroutine.yield("more text")]]
 				trim_left = false
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_left (force no trim)", function()
@@ -967,7 +967,7 @@ coroutine.yield("more text")]]
 				trim_left = "all"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_right (force trim)", function ()
@@ -982,7 +982,7 @@ coroutine.yield("more text")]]
 				name = "=(liluat.loadstring)"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_right (force no trim)", function ()
@@ -997,7 +997,7 @@ coroutine.yield("more text")]]
 				name = "=(liluat.loadstring)"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_left and trim_right (force trim)", function ()
@@ -1013,7 +1013,7 @@ coroutine.yield("more text")]]
 				name = "=(liluat.loadstring)"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 
 		it("should locally override trim_left and trim_right (force no trim)", function ()
@@ -1029,7 +1029,7 @@ coroutine.yield("more text")]]
 				name = "=(liluat.loadstring)"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.loadstring(template, options))
 		end)
 	end)
 
