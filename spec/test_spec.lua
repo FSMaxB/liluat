@@ -1053,7 +1053,7 @@ coroutine.yield("more text")]]
 		end)
 	end)
 
-	describe("get_dependency", function ()
+	describe("get_dependencies", function ()
 		it("should list all includes", function ()
 			local template = '{{include: "spec/index.html.template"}}'
 			local expected_output = {
@@ -1061,7 +1061,7 @@ coroutine.yield("more text")]]
 				"spec/content.html.template"
 			}
 
-			assert.same(expected_output, liluat.get_dependency(template))
+			assert.same(expected_output, liluat.get_dependencies(template))
 		end)
 
 		it("should list every file only once", function ()
@@ -1071,7 +1071,7 @@ coroutine.yield("more text")]]
 				"spec/content.html.template"
 			}
 
-			assert.same(expected_output, liluat.get_dependency(template))
+			assert.same(expected_output, liluat.get_dependencies(template))
 		end)
 	end)
 

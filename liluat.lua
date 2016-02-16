@@ -310,7 +310,7 @@ function liluat.precompile(template, options, path)
 end
 
 -- @return { string }
-function liluat.get_dependency(template, options)
+function liluat.get_dependencies(template, options)
 	options = initialise_options(options)
 
 	local include_list = {}
