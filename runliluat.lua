@@ -1,15 +1,17 @@
 #!/usr/bin/env lua
 
 --[[
--- runslt2 - Render a template, as a standalone command
+-- runliluat - Render a template, as a standalone command
 --
--- Project page: https://github.com/henix/slt2
+-- Project page: https://github.com/FSMaxB/liluat
+--
+-- liluat is based on slt2 by henix, see https://github.com/henix/slt2
 --
 -- @License
 -- MIT License
 --]]
 
-local slt2 = require('slt2')
+local liluat = require('liluat')
 
 local valueStr = nil
 local template = nil
@@ -17,9 +19,9 @@ local luadef = nil
 
 if #arg ~= 2 and #arg ~= 4 and #arg ~= 6 then
 	print([[Usage:
-1. runslt2.lua [-d luafile] -v '{name=value;luatable}' < template_file
-2. runslt2.lua [-d luafile] -t template_file < lua_value_file
-3. runslt2.lua [-d luafile] -v '{name=value;luatable}' -t template_file]])
+1. runliluat.lua [-d luafile] -v '{name=value;luatable}' < template_file
+2. runliluat.lua [-d luafile] -t template_file < lua_value_file
+3. runliluat.lua [-d luafile] -v '{name=value;luatable}' -t template_file]])
 	os.exit(1)
 end
 
@@ -70,4 +72,4 @@ else -- lua 5.2
 	value = assert(load('return '..valueStr))()
 end
 
-io.write(slt2.render(slt2.loadstring(template), value))
+io.write(liluat.render(liluat.loadstring(template), value))

@@ -1,4 +1,4 @@
-local slt2 = require('slt2')
+local liluat = require('liluat')
 
 local user = {
 	name = '<world>'
@@ -16,7 +16,7 @@ function escapeHTML(str)
 	return r
 end
 
-local tmpl = slt2.loadstring([[<span>
+local tmpl = liluat.loadstring([[<span>
 #{ if user ~= nil then }#
 Hello, #{= escapeHTML(user.name) }#!
 #{ else }#
@@ -25,4 +25,4 @@ Hello, #{= escapeHTML(user.name) }#!
 </span>
 ]])
 
-io.write(slt2.render(tmpl, {user = user}))
+io.write(liluat.render(tmpl, {user = user}))

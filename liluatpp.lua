@@ -1,9 +1,9 @@
 #!/usr/bin/env lua
 
-local slt2 = require('slt2')
+local liluat = require('liluat')
 
 if #arg > 1 then
-	print('Usage: slt2dep.lua filename')
+	print('Usage: liluatpp.lua filename')
 	os.exit(1)
 end
 
@@ -17,4 +17,4 @@ else
 	content = io.read('*a')
 end
 
-print(table.concat(slt2.get_dependency(content), '\t'))
+io.write(liluat.precompile(content))

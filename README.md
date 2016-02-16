@@ -1,13 +1,13 @@
-# slt2
+# liluat
 
 [![Travis Build Status](https://travis-ci.org/FSMaxB/liluat.svg?branch=master)](https://travis-ci.org/FSMaxB/liluat)
 
-slt2 is a Lua template processor. Similar to php or jsp, you can embed lua code directly.
+liluat is a Lua template processor. Similar to php or jsp, you can embed lua code directly.
 
 ## Installation
 
 ```
-luarocks install slt2
+luarocks install liluat
 ```
 
 ## Example
@@ -15,7 +15,7 @@ luarocks install slt2
 see test.lua
 
 ```lua
-local slt2 = require('slt2')
+local liluat = require('liluat')
 
 local user = {
   name = '<world>'
@@ -33,7 +33,7 @@ function escapeHTML(str)
   return r
 end
 
-local tmpl = slt2.loadstring([[<span>
+local tmpl = liluat.loadstring([[<span>
 #{ if user ~= nil then }#
 Hello, #{= escapeHTML(user.name) }#!
 #{ else }#
@@ -42,7 +42,7 @@ Hello, #{= escapeHTML(user.name) }#!
 </span>
 ]])
 
-io.write(slt2.render(tmpl, {user = user}))
+io.write(liluat.render(tmpl, {user = user}))
 ```
 
 ## Template Syntax
@@ -55,43 +55,40 @@ NOTE: don't specify a cyclic inclusion
 
 ## API Reference
 
-### slt2.loadstring(template, start\_tag, end\_tag, tmpl\_name)
-### slt2.loadfile(filename, start\_tag, end\_tag)
+### liluat.loadstring(template, start\_tag, end\_tag, tmpl\_name)
+### liluat.loadfile(filename, start\_tag, end\_tag)
 
 "Compile" the template from a string or a file, return compiled object.
 
 * start_tag: default "#{"
 * end_tag: default "}#"
 
-### slt2.render\_co(f, env)
+### liluat.render\_co(f, env)
 
 Return a coroutine function which yields a chunk of result every time. You can `coroutine.create` or `coroutine.wrap` on it.
 
-### slt2.render(f, env)
+### liluat.render(f, env)
 
 Return render result as a string.
 
 ## Standalone commands
 
-* runslt2.lua : render a template with a lua table value
-* slt2pp.lua : preprocess a template (inline included files)
-* slt2dep.lua : output dependencies of a template file (the included files, like -MD option of gcc)
+* runliluat.lua : render a template with a lua table value
+* liluatpp.lua : preprocess a template (inline included files)
+* liluatdep.lua : output dependencies of a template file (the included files, like -MD option of gcc)
 
 To install, create a symbolic link to them in your path.
 
 ## Compatibility
 
-slt2 has been tested on:
+liluat has been tested on:
 
 * Lua 5.1
 * Lua 5.2
+* Lua 5.3
 * luajit 2.0
 
 Other versions of Lua are not tested.
-
-## Links
-
-* [Simple Lua Template](https://blog.henix.info/blog/simple-lua-template/_.html) (Chinese)
 
 ## License
 
@@ -99,4 +96,4 @@ MIT License
 
 ## Contribute
 
-Please create an issue, explaining what's the problem you are trying to solve, before you send a pull request. See [issue #5](https://github.com/henix/slt2/issues/5) for an example.
+Please create an issue, explaining what's the problem you are trying to solve, before you send a pull request.
