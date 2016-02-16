@@ -351,7 +351,7 @@ some more text]]
 		end)
 	end)
 
-	describe("liluat.lex", function ()
+	describe("parse", function ()
 		it("should create a list of chunks", function ()
 			local template = [[
 {{= expression}} bla {{code}}
@@ -398,7 +398,7 @@ some more text]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should include files", function ()
@@ -414,7 +414,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should work with other start and end tags", function ()
@@ -438,7 +438,7 @@ another line]]
 				start_tag = "{%",
 				end_tag = "%}"
 			}
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 
 		it("should use existing table if specified", function ()
@@ -463,7 +463,7 @@ another line]]
 				start_tag = "{{",
 				end_tag = "}}"
 			}
-			local result = liluat.lex(template, options, output)
+			local result = liluat.private.parse(template, options, output)
 
 			assert.equal(output, result)
 			assert.same(expected_output, result)
@@ -474,7 +474,7 @@ another line]]
 
 			assert.has_error(
 				function ()
-					liluat.lex(template)
+					liluat.private.parse(template)
 				end,
 				"Cyclic inclusion detected")
 		end)
@@ -489,7 +489,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should include relative paths", function ()
@@ -502,7 +502,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, nil, nil, nil, template_path))
+			assert.same(expected_output, liluat.private.parse(template, nil, nil, nil, template_path))
 		end)
 
 		it("should include paths relative to a base path", function ()
@@ -519,7 +519,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 
 		it("should include more paths relative to a base path", function ()
@@ -536,7 +536,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 	end)
 
