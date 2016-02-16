@@ -14,6 +14,12 @@ if [ "$LUA" == "LuaJIT 2.0" ]; then
 	wget -O - https://github.com/LuaJIT/LuaJIT/archive/v2.0.4.tar.gz | tar xz
 	cd LuaJIT-2.0.4
 	make && make install INSTALL_TSYMNAME=lua PREFIX="$HOME/prefix/"
+elif [ "$LUA" == "LuaJIT 2.1" ]; then
+	wget -O - https://github.com/LuaJIT/LuaJIT/archive/v2.1.0-beta1.tar.gz | tar xz
+	cd LuaJIT-2.1.0-beta1
+	make && make install INSTALL_TSYMNAME=lua PREFIX="$HOME/prefix/"
+	ln -sf luajit-2.1.0-beta1 "$HOME/prefix/bin/lua"
+	ln -sf luajit-2.1 "$HOME/prefix/include/lua5.1"
 else
 	if [ "$LUA" == "Lua 5.1" ]; then
 		wget -O - http://www.lua.org/ftp/lua-5.1.5.tar.gz | tar xz
