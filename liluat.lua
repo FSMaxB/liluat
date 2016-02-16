@@ -82,8 +82,8 @@ end
 liluat.private.merge_tables = merge_tables
 
 local default_options = {
-	start_tag = "#{",
-	end_tag = "}#",
+	start_tag = "{{",
+	end_tag = "}}",
 	template_name = "default_name",
 	trim_right = "code",
 	trim_left = "code"
@@ -251,7 +251,7 @@ liluat.private.dirname = dirname
 -- chunks are either a template delimited by start_tag and end_tag
 -- or a text chunk (everything else)
 -- @return table
-function liluat.lex(template, options, output, include_list, current_path)
+local function parse(template, options, output, include_list, current_path)
 	options = initialise_options(options)
 	current_path = current_path or "." -- current include path
 
@@ -276,7 +276,7 @@ function liluat.lex(template, options, output, include_list, current_path)
 			add_include_and_detect_cycles(include_list, path)
 
 			local included_template = read_entire_file(path)
-			liluat.lex(included_template, options, output, include_list[path], path)
+			parse(included_template, options, output, include_list[path], path)
 		elseif (chunk.type == "text") and output[#output] and (output[#output].type == "text") then
 			-- ensure that no two text chunks follow each other
 			output[#output].text = output[#output].text .. chunk.text
@@ -288,14 +288,15 @@ function liluat.lex(template, options, output, include_list, current_path)
 
 	return output
 end
+liluat.private.parse = parse
 
--- preprocess included files
+-- inline included template files
 -- @return string
-function liluat.precompile(template, options, path)
+function liluat.inline(template, options, start_path)
 	options = initialise_options(options)
 
 	local output = {}
-	for _,chunk in ipairs(liluat.lex(template, options, nil, nil, path)) do
+	for _,chunk in ipairs(parse(template, options, nil, nil, start_path)) do
 		if chunk.type == "expression" then
 			table.insert(output, options.start_tag .. "=" .. chunk.text .. options.end_tag)
 		elseif chunk.type == "code" then
@@ -309,11 +310,11 @@ function liluat.precompile(template, options, path)
 end
 
 -- @return { string }
-function liluat.get_dependency(template, options)
+function liluat.get_dependencies(template, options)
 	options = initialise_options(options)
 
 	local include_list = {}
-	liluat.lex(template, options, nil, include_list)
+	parse(template, options, nil, include_list)
 
 	local dependencies = {}
 	local have_seen = {} -- list of includes that were already added
@@ -331,15 +332,16 @@ function liluat.get_dependency(template, options)
 	return dependencies
 end
 
+-- compile a template into lua code
 -- @return { name = string, code = string / function}
-function liluat.loadstring(template, template_name, options, path)
+function liluat.compile(template, options, template_name, start_path)
 	options = initialise_options(options)
-	options.template_name = template_name or '=(liluat.loadstring)'
+	options.template_name = template_name or 'liluat.compile'
 
 	local output_function = "coroutine.yield"
 
 	-- split the template string into chunks
-	local lexed_template = liluat.lex(template, options, nil, nil, path)
+	local lexed_template = parse(template, options, nil, nil, start_path)
 
 	-- table of code fragments the template is compiled into
 	local lua_code = {}
@@ -421,20 +423,21 @@ function liluat.loadstring(template, template_name, options, path)
 	}
 end
 
+-- compile a file
 -- @return { name = string, code = string / function }
-function liluat.loadfile(filename, options)
-	return liluat.loadstring(read_entire_file(filename), filename, options, filename)
+function liluat.compile_file(filename, options)
+	return liluat.compile(read_entire_file(filename), options, filename, filename)
 end
 
 -- @return a coroutine function
-function liluat.render_co(template, environment)
+function liluat.render_coroutine(template, environment)
 	return sandbox(template.code, template.name, environment)
 end
 
 -- @return string
 function liluat.render(t, env)
 	local result = {}
-	local co = coroutine.create(liluat.render_co(t, env))
+	local co = coroutine.create(liluat.render_coroutine(t, env))
 	while coroutine.status(co) ~= 'dead' do
 		local ok, chunk = coroutine.resume(co)
 		if not ok then

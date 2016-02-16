@@ -1,1 +1,1 @@
-#{include: "a.template"}#
+{{include: "a.template"}}

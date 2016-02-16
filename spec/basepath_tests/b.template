@@ -1,1 +1,1 @@
-#{include: "content.html.template"}#
+{{include: "content.html.template"}}

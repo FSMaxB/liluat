@@ -217,13 +217,13 @@ if options_string then
 end
 
 if list_dependencies then
-	local dependencies = liluat.get_dependency(template, options)
+	local dependencies = liluat.get_dependencies(template, options)
 	write_out(table.concat(dependencies, "\n").."\n")
 	os.exit(0)
 end
 
 if inline then
-	write_out(liluat.precompile(template, options, path))
+	write_out(liluat.inline(template, options, path))
 	os.exit(0)
 end
 
@@ -234,8 +234,8 @@ end
 
 -- now process the template
 if template_path then
-	write_out(liluat.render(liluat.loadfile(template_path, options), values))
+	write_out(liluat.render(liluat.compile_file(template_path, options), values))
 else
-	write_out(liluat.render(liluat.loadstring(template, template_name, options, path), values))
+	write_out(liluat.render(liluat.compile(template, options, template_name, path), values))
 end
 os.exit(0)

@@ -237,7 +237,7 @@ describe("runliluat", function ()
 	end)
 
 	it("should print dependencies", function ()
-		local template = '#{include: "spec/index.html.template"}#'
+		local template = '{{include: "spec/index.html.template"}}'
 		local expected_output = {
 			0,
 			"spec/index.html.template\n"
@@ -253,7 +253,7 @@ describe("runliluat", function ()
 			local template = liluat.private.read_entire_file("spec/index.html.template")
 			local expected_output = {
 				0,
-				liluat.private.read_entire_file("spec/index.html.template.precompiled"),
+				liluat.private.read_entire_file("spec/index.html.template.inlined"),
 				""
 			}
 
@@ -295,7 +295,7 @@ describe("runliluat", function ()
 	end)
 
 	it("should load values from a file", function ()
-		local template = "#{= name}#"
+		local template = "{{= name}}"
 		local value_path = "spec/values"
 		local expected_output = {
 			0,
@@ -319,7 +319,7 @@ describe("runliluat", function ()
 	end)
 
 	it("should load values from a parameter", function ()
-		local template = "#{= name}#"
+		local template = "{{= name}}"
 		local values = '{name = "max"}'
 
 		local expected_output = {
@@ -387,7 +387,7 @@ describe("runliluat", function ()
 	end)
 
 	it("should load templates from stdin", function ()
-		local template = "#{= name}#"
+		local template = "{{= name}}"
 		local value_path = "spec/values"
 
 		local expected_output = {

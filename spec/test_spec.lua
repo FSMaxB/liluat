@@ -25,16 +25,16 @@ local liluat = require("liluat")
 
 describe("liluat", function ()
 	it("should return an empty string for empty templates", function ()
-		assert.equal("", liluat.render(liluat.loadstring(""), {}))
+		assert.equal("", liluat.render(liluat.compile(""), {}))
 	end)
 
 	it("should render some example template", function ()
-		local tmpl = liluat.loadstring([[<span>
-#{ if user ~= nil then }#
-Hello, #{= escapeHTML(user.name) }#!
-#{ else }#
+		local tmpl = liluat.compile([[<span>
+{{ if user ~= nil then }}
+Hello, {{= escapeHTML(user.name) }}!
+{{ else }}
 <a href="/login">login</a>
-#{ end }#
+{{ end }}
 </span>
 ]])
 
@@ -153,10 +153,10 @@ Hello, &lt;world&gt;!
 	describe("all_chunks", function ()
 		it("should iterate over all chunks", function ()
 			local template = [[
-#{= expression}# bla #{code}#
- #{other code}# some text
-#{more code}##{}#
-#{include: "bla"}#
+{{= expression}} bla {{code}}
+ {{other code}} some text
+{{more code}}{{}}
+{{include: "bla"}}
 some more text]]
 			local result = {}
 
@@ -215,7 +215,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_left", function ()
-			local template = "\t#{-code}#"
+			local template = "\t{{-code}}"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -238,7 +238,7 @@ some more text]]
 		end)
 
 		it("should detect manually disabled trim left", function ()
-			local template = "\t#{+code}#"
+			local template = "\t{{+code}}"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -261,7 +261,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_right", function ()
-			local template = "#{code-}#\n"
+			local template = "{{code-}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -284,7 +284,7 @@ some more text]]
 		end)
 
 		it("should detect manually disabled trim_right", function ()
-			local template = "#{code+}#\n"
+			local template = "{{code+}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -307,7 +307,7 @@ some more text]]
 		end)
 
 		it("should detect manual trim_left and trim_right", function ()
-			local template = "\t#{-code-}#\n"
+			local template = "\t{{-code-}}\n"
 
 			local chunks = {}
 			for chunk in liluat.private.all_chunks(template) do
@@ -351,12 +351,12 @@ some more text]]
 		end)
 	end)
 
-	describe("liluat.lex", function ()
+	describe("parse", function ()
 		it("should create a list of chunks", function ()
 			local template = [[
-#{= expression}# bla #{code}#
- #{other code}# some text
-#{more code}##{}#
+{{= expression}} bla {{code}}
+ {{other code}} some text
+{{more code}}{{}}
 some more text]]
 
 			local expected_output = {
@@ -398,13 +398,13 @@ some more text]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should include files", function ()
 			local template = [[
 first line
-#{include: "spec/read_entire_file-test"}#
+{{include: "spec/read_entire_file-test"}}
 another line]]
 
 			local expected_output = {
@@ -414,7 +414,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should work with other start and end tags", function ()
@@ -438,7 +438,7 @@ another line]]
 				start_tag = "{%",
 				end_tag = "%}"
 			}
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 
 		it("should use existing table if specified", function ()
@@ -463,24 +463,24 @@ another line]]
 				start_tag = "{{",
 				end_tag = "}}"
 			}
-			local result = liluat.lex(template, options, output)
+			local result = liluat.private.parse(template, options, output)
 
 			assert.equal(output, result)
 			assert.same(expected_output, result)
 		end)
 
 		it("should detect cyclic inclusions", function ()
-			local template = "#{include: 'spec/cycle_a.template'}#"
+			local template = "{{include: 'spec/cycle_a.template'}}"
 
 			assert.has_error(
 				function ()
-					liluat.lex(template)
+					liluat.private.parse(template)
 				end,
 				"Cyclic inclusion detected")
 		end)
 
 		it("should not create two or more text chunks in a row", function ()
-			local template = 'text#{include: "spec/content.html.template"}#more text'
+			local template = 'text{{include: "spec/content.html.template"}}more text'
 
 			local expected_output = {
 				{
@@ -489,7 +489,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template))
+			assert.same(expected_output, liluat.private.parse(template))
 		end)
 
 		it("should include relative paths", function ()
@@ -502,7 +502,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, nil, nil, nil, template_path))
+			assert.same(expected_output, liluat.private.parse(template, nil, nil, nil, template_path))
 		end)
 
 		it("should include paths relative to a base path", function ()
@@ -519,7 +519,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 
 		it("should include more paths relative to a base path", function ()
@@ -536,7 +536,7 @@ another line]]
 				}
 			}
 
-			assert.same(expected_output, liluat.lex(template, options))
+			assert.same(expected_output, liluat.private.parse(template, options))
 		end)
 	end)
 
@@ -571,11 +571,11 @@ another line]]
 		end)
 	end)
 
-	describe("liluat.loadstring", function ()
+	describe("liluat.compile", function ()
 		it("should compile templates into code", function ()
-			local template = "a#{i = 0}##{= i}#b"
+			local template = "a{{i = 0}}{{= i}}b"
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("a")
 i = 0
@@ -583,7 +583,7 @@ coroutine.yield( i)
 coroutine.yield("b")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template))
+			assert.same(expected_output, liluat.compile(template))
 		end)
 
 		it("should accept template names", function ()
@@ -594,7 +594,7 @@ coroutine.yield("b")]]
 				code = 'coroutine.yield("a")'
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, template_name))
+			assert.same(expected_output, liluat.compile(template, nil, template_name))
 		end)
 
 		it("should accept other template tags passed as options", function ()
@@ -604,7 +604,7 @@ coroutine.yield("b")]]
 				end_tag = "}}"
 			}
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("a")
 i = 0
@@ -612,7 +612,7 @@ coroutine.yield( i)
 coroutine.yield("b")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should trim all trailing newlines if told so", function ()
@@ -621,14 +621,14 @@ coroutine.yield("b")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -639,7 +639,7 @@ end
 coroutine.yield("some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should trim trailing newlines after expressions if told so", function ()
@@ -648,14 +648,14 @@ coroutine.yield("some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -671,7 +671,7 @@ coroutine.yield("\
 some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should trim trailing newlines after code if told so", function ()
@@ -680,14 +680,14 @@ some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -700,7 +700,7 @@ end
 coroutine.yield("some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("shouldn't trim newlines if told so", function ()
@@ -709,14 +709,14 @@ coroutine.yield("some text")]]
 			}
 			local template = [[
 some text
-#{for i = 1, 5 do}#
-#{= i}#
-#{end}#
-#{ -- comment}#
+{{for i = 1, 5 do}}
+{{= i}}
+{{end}}
+{{ -- comment}}
 some text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -734,7 +734,7 @@ coroutine.yield("\
 some text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 
 		end)
 
@@ -745,14 +745,14 @@ some text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
+ 	{{for i = 1, 5 do}}
 
-	#{= i}#
- #{end}#
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -768,7 +768,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.compile(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -781,13 +781,13 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
  	")
@@ -802,7 +802,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.compile(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -815,13 +815,13 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -836,7 +836,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.compile(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 			assert.same(expected_output, output)
@@ -849,13 +849,13 @@ some more text")]]
 			}
 			local template = [[
 some text
- 	#{for i = 1, 5 do}#
-	#{= i}#
- #{end}#
+ 	{{for i = 1, 5 do}}
+	{{= i}}
+ {{end}}
 some more text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
  	")
@@ -870,7 +870,7 @@ coroutine.yield("\
 some more text")]]
 			}
 
-			local output = liluat.loadstring(template, nil, options)
+			local output = liluat.compile(template, options)
 			output.code = output.code:gsub("\\9", "\t") --make the test work across lua versions
 
 
@@ -885,20 +885,20 @@ some more text")]]
 
 			local template = [[
 some text
- #{= 1}#
- #{= 2}#
-#{= 3}#
+ {{= 1}}
+ {{= 2}}
+{{= 3}}
 
-#{= 4}#
-#{= 5}# 
+{{= 4}}
+{{= 5}} 
 
-#{= 6}# 
-#{= 7}# 
-	#{= 8}#
+{{= 6}} 
+{{= 7}} 
+	{{= 8}}
 more text]]
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = [[
 coroutine.yield("some text\
 ")
@@ -922,56 +922,56 @@ coroutine.yield( 8)
 coroutine.yield("more text")]]
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should trim left in the first line", function ()
-			local template = "\t#{code}#"
+			local template = "\t{{code}}"
 
 			local options = {
 				trim_left = "all"
 			}
 
 			local expected_output = {
-				name = "=(liluat.loadstring)",
+				name = "liluat.compile",
 				code = "code"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_left (force trim)", function ()
-			local template = "\t#{-code}#"
+			local template = "\t{{-code}}"
 
 			local expected_output = {
 				code = "code",
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
 			local options = {
 				trim_left = false
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_left (force no trim)", function()
-			local template = "  #{+code}#"
+			local template = "  {{+code}}"
 
 			local expected_output = {
 				code = 'coroutine.yield("  ")\ncode',
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
 			local options = {
 				trim_left = "all"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_right (force trim)", function ()
-			local template = "#{code-}#\n"
+			local template = "{{code-}}\n"
 
 			local options = {
 				trim_left = false
@@ -979,14 +979,14 @@ coroutine.yield("more text")]]
 
 			local expected_output =  {
 				code = "code",
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_right (force no trim)", function ()
-			local template = "#{code+}#\n"
+			local template = "{{code+}}\n"
 
 			local options = {
 				trim_left = "all"
@@ -994,14 +994,14 @@ coroutine.yield("more text")]]
 
 			local expected_output =  {
 				code = 'code\ncoroutine.yield("\\\n")',
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_left and trim_right (force trim)", function ()
-			local template = "  #{-code-}#\n"
+			local template = "  {{-code-}}\n"
 
 			local options = {
 				trim_left = false,
@@ -1010,14 +1010,14 @@ coroutine.yield("more text")]]
 
 			local expected_output = {
 				code = 'code',
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 
 		it("should locally override trim_left and trim_right (force no trim)", function ()
-			local template = "  #{+code+}#\n"
+			local template = "  {{+code+}}\n"
 
 			local options = {
 				trim_left = "all",
@@ -1026,19 +1026,19 @@ coroutine.yield("more text")]]
 
 			local expected_output = {
 				code = 'coroutine.yield("  ")\ncode\ncoroutine.yield("\\\n")',
-				name = "=(liluat.loadstring)"
+				name = "liluat.compile"
 			}
 
-			assert.same(expected_output, liluat.loadstring(template, nil, options))
+			assert.same(expected_output, liluat.compile(template, options))
 		end)
 	end)
 
-	describe("liluat.loadfile", function ()
+	describe("liluat.compile_file", function ()
 		it("should load a template file", function ()
 			local template_path = "spec/index.html.template"
 			local expected_output = loadfile("spec/index.html.template.lua")()
 
-			assert.same(expected_output, liluat.loadfile(template_path))
+			assert.same(expected_output, liluat.compile_file(template_path))
 		end)
 
 		it("should accept different tags via the options", function ()
@@ -1049,38 +1049,38 @@ coroutine.yield("more text")]]
 			}
 			local expected_output = loadfile("spec/jinja.template.lua")()
 
-			assert.same(expected_output, liluat.loadfile(template_path, options))
+			assert.same(expected_output, liluat.compile_file(template_path, options))
 		end)
 	end)
 
-	describe("get_dependency", function ()
+	describe("get_dependencies", function ()
 		it("should list all includes", function ()
-			local template = '#{include: "spec/index.html.template"}#'
+			local template = '{{include: "spec/index.html.template"}}'
 			local expected_output = {
 				"spec/index.html.template",
 				"spec/content.html.template"
 			}
 
-			assert.same(expected_output, liluat.get_dependency(template))
+			assert.same(expected_output, liluat.get_dependencies(template))
 		end)
 
 		it("should list every file only once", function ()
-			local template = '#{include: "spec/index.html.template"}##{include: "spec/index.html.template"}#'
+			local template = '{{include: "spec/index.html.template"}}{{include: "spec/index.html.template"}}'
 			local expected_output = {
 				"spec/index.html.template",
 				"spec/content.html.template"
 			}
 
-			assert.same(expected_output, liluat.get_dependency(template))
+			assert.same(expected_output, liluat.get_dependencies(template))
 		end)
 	end)
 
-	describe("liluat.precompile", function ()
-		it("should precompile a template", function ()
+	describe("liluat.inline", function ()
+		it("should inline a template", function ()
 			local template = liluat.private.read_entire_file("spec/index.html.template")
-			local expected_output = liluat.private.read_entire_file("spec/index.html.template.precompiled")
+			local expected_output = liluat.private.read_entire_file("spec/index.html.template.inlined")
 
-			assert.equal(expected_output, liluat.precompile(template, nil, "spec/"))
+			assert.equal(expected_output, liluat.inline(template, nil, "spec/"))
 		end)
 	end)
 
