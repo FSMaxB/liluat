@@ -1,0 +1,4 @@
+{
+    start_tag = "{%",
+    end_tag = "%}"
+}

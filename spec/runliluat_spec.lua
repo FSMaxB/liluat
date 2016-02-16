@@ -80,6 +80,46 @@ local function execute_with_in_and_output(command, input)
 	return exit_status, stdout, stderr
 end
 
+local function get_error_code()
+	return (_VERSION == "Lua 5.1") and 256 or 1
+end
+
+local usage_string = [[
+Usage: runliluat.lua [options]
+Options:
+	-h|--help
+		Show this message.
+	--values lua_table
+		Table containing values to use in the template.
+	--value-file file_name
+		Use a file to define the table of values to use in the template.
+	-t|--template-file file_name
+		File that contains the template
+	-n|--name template_name
+		Name to use for the template
+	-d|--dependencies
+		List the dependencies of the template (list of included files)
+	-i|--inline
+		Inline all the included files into one template.
+	-o|--output filename
+		File to write the output to (defaults to stdout)
+	--options lua_table
+		A table of options for liluat
+	--options-file file_name
+		Read the options from a file.
+	--stdin "template"
+		Get the template from stdin.
+	--stdin "values"
+		Get the table of values from stdin.
+	--stdin "options"
+		Get the options from stdin.
+	-v|--version
+		Print the current version.
+	--path path
+		Root path of the templates.
+
+]]
+
 describe("runliluat test helpers", function ()
 	it("should execute commands", function ()
 		assert.equal(0, execute_command("true"))
@@ -100,5 +140,275 @@ describe("runliluat test helpers", function ()
 		}
 
 		assert.same(expected_output, {execute_with_in_and_output("sh -c 'echo hello >&2'")})
+	end)
+end)
+
+describe("runliluat", function ()
+	it("should complain when no parameters were given", function ()
+		local expected_output = {
+			get_error_code(), usage_string, "ERROR: No parameter given.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua")})
+	end)
+
+	it("should complain on incorrect parameters", function ()
+		local expected_output = {
+			get_error_code(), usage_string, 'ERROR: Invalid parameter "-a".\n'
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -a")})
+	end)
+
+	it("should print the help", function ()
+		local expected_output = {
+			0, usage_string, ""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -h")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --help")})
+	end)
+
+	it("should print it's version", function ()
+		local expected_output = {
+			0,
+			liluat.version().."\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version")})
+	end)
+
+	it("should complain when trying to print version, get dependencies and inline", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: Can't print_version, determine dependencies and inline a template at the same time.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --dependencies -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --dependencies --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --dependencies --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --dependencies -i")})
+	end)
+
+	it("should complain when trying to get dependencies and inline", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: Can't both determine dependencies and inline a template.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --inline")})
+	end)
+
+	it("should complain when trying to get dependencies and print the version", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: Can't both determine dependencies and print the version.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -v")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --version")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -v")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --version")})
+	end)
+
+	it("should complain when trying to print the version and inline", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: Can't both print the version and inline a template.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -i")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --inline")})
+	end)
+
+	it("should print dependencies", function ()
+		local template = '#{include: "spec/index.html.template"}#'
+		local expected_output = {
+			0,
+			"spec/index.html.template\n"
+			.. "spec/content.html.template\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --stdin template", template)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --stdin template", template)})
+	end)
+
+	it("should inline a template", function ()
+			local template = liluat.private.read_entire_file("spec/index.html.template")
+			local expected_output = {
+				0,
+				liluat.private.read_entire_file("spec/index.html.template.precompiled"),
+				""
+			}
+
+			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template -i", template)})
+			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template --inline", template)})
+	end)
+
+	it("should accept template paths via --path", function ()
+		local template_path = 'spec/basepath_tests/base_a.template'
+		local template = liluat.private.read_entire_file(template_path)
+		local expected_output = {
+			0,
+			"<h1>This is the index page.</h1>\n\n\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path '"..template_path.."' --stdin template ", template)})
+	end)
+
+	it("should complain when no template is specified", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: No template specified.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d")})
+	end)
+
+	it("should not crash when a template name is specified", function ()
+		local expected_output = {
+			0,
+			"",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template -n 'test'", "")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --name 'test'", "")})
+	end)
+
+	it("should load values from a file", function ()
+		local template = "#{= name}#"
+		local value_path = "spec/values"
+		local expected_output = {
+			0,
+			"max",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --value-file "..value_path, template)})
+	end)
+
+	it("should load values from stdin", function ()
+		local template_path = "spec/template"
+		local values = '{name = "max"}'
+		local expected_output = {
+			0,
+			"max\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin values -t "..template_path, values)})
+	end)
+
+	it("should load values from a parameter", function ()
+		local template = "#{= name}#"
+		local values = '{name = "max"}'
+
+		local expected_output = {
+			0,
+			"max",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --values '"..values.."'", template)})
+	end)
+
+	it("should load options from a file", function ()
+		local options_path = "spec/options"
+		local template = '{%= name%}'
+		local values = '{name = "max"}'
+
+		local expected_output = {
+			0,
+			"max",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --options-file "..options_path.." --values '"..values.."'", template)})
+	end)
+
+	it("should load options from stdin", function ()
+		local options = '{start_tag = "{%", end_tag = "%}"}'
+		local template_path = "spec/template-jinja"
+		local values = '{name = "max"}'
+
+		local expected_output = {
+			0,
+			"max\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin options -t "..template_path.." --values '"..values.."'", options)})
+	end)
+
+	it("should load options from a parameter", function ()
+		local options = '{start_tag = "{%", end_tag = "%}"}'
+		local template_path = "spec/template-jinja"
+		local values = '{name = "max"}'
+
+		local expected_output = {
+			0,
+			"max\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --options '"..options.."' -t "..template_path.." --stdin values", values)})
+	end)
+
+	it("should load templates from a file", function ()
+		local template_path = 'spec/template'
+		local values = '{name = "max"}'
+
+		local expected_output = {
+			0,
+			"max\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -t "..template_path.." --stdin values", values)})
+	end)
+
+	it("should load templates from stdin", function ()
+		local template = "#{= name}#"
+		local value_path = "spec/values"
+
+		local expected_output = {
+			0,
+			"max",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --value-file "..value_path.." --stdin template", template)})
+	end)
+
+	it("should write it's output to a file", function ()
+		local file, filename = tempfile()
+		file:close()
+
+		execute_with_in_and_output("./runliluat.lua -o "..filename.. " -v")
+		assert.equal(liluat.version().."\n", liluat.private.read_entire_file(filename))
+
+		execute_with_in_and_output("./runliluat.lua --output "..filename.. " -v")
+		assert.equal(liluat.version().."\n", liluat.private.read_entire_file(filename))
+
+		os.remove(filename)
 	end)
 end)
