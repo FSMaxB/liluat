@@ -289,18 +289,18 @@ end
 function liluat.precompile(template, options, path)
 	options = initialise_options(options)
 
-	local output = ""
+	local output = {}
 	for _,chunk in ipairs(liluat.lex(template, options, nil, nil, path)) do
 		if chunk.type == "expression" then
-			output = output .. options.start_tag .. "=" .. chunk.text .. options.end_tag
+			table.insert(output, options.start_tag .. "=" .. chunk.text .. options.end_tag)
 		elseif chunk.type == "code" then
-			output = output .. options.start_tag .. chunk.text .. options.end_tag
+			table.insert(output, options.start_tag .. chunk.text .. options.end_tag)
 		else
-			output = output .. chunk.text
+			table.insert(output, chunk.text)
 		end
 	end
 
-	return output
+	return table.concat(output)
 end
 
 -- @return { string }
