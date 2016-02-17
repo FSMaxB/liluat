@@ -1,5 +1,5 @@
 package = "liluat"
-version = "scm-0"
+version = "scm-1"
 
 source = {
   url = "git://github.com/FSMaxB/liluat",
@@ -23,9 +23,7 @@ build = {
   },
   install = {
     bin = {
-      runliluat = "runliluat.lua",
-      liluatdep = "liluatdep.lua",
-      liluatpp = "liluatpp.lua"
+      runliluat = "runliluat.lua"
     }
   }
 }
