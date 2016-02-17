@@ -310,11 +310,11 @@ function liluat.inline(template, options, start_path)
 end
 
 -- @return { string }
-function liluat.get_dependencies(template, options)
+function liluat.get_dependencies(template, options, start_path)
 	options = initialise_options(options)
 
 	local include_list = {}
-	parse(template, options, nil, include_list)
+	parse(template, options, nil, include_list, start_path)
 
 	local dependencies = {}
 	local have_seen = {} -- list of includes that were already added
