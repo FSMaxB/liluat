@@ -1,13 +1,13 @@
 package = "liluat"
-version = "scm-1"
+version = "scm-2"
 
 source = {
   url = "git://github.com/FSMaxB/liluat",
 }
 
 description = {
-  summary = "Lightweight Lua Template engine.",
-  detailed = "liluat is a Lua template processor. Similar to php or jsp, you can embed lua code directly",
+  summary = "Lightweight Lua based template engine.",
+  detailed = "Liluat is a lightweight Lua based template engine. While simple to use it's still powerfull because you can embed arbitrary Lua code in templates. It doesn't need external dependencies other than Lua itself.",
   homepage = "https://github.com/FSMaxB/liluat",
   license = "MIT <http://opensource.org/licenses/MIT>"
 }
