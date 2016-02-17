@@ -84,7 +84,6 @@ liluat.private.merge_tables = merge_tables
 local default_options = {
 	start_tag = "{{",
 	end_tag = "}}",
-	template_name = "default_name",
 	trim_right = "code",
 	trim_left = "code"
 }
@@ -310,11 +309,11 @@ function liluat.inline(template, options, start_path)
 end
 
 -- @return { string }
-function liluat.get_dependencies(template, options)
+function liluat.get_dependencies(template, options, start_path)
 	options = initialise_options(options)
 
 	local include_list = {}
-	parse(template, options, nil, include_list)
+	parse(template, options, nil, include_list, start_path)
 
 	local dependencies = {}
 	local have_seen = {} -- list of includes that were already added
@@ -336,7 +335,7 @@ end
 -- @return { name = string, code = string / function}
 function liluat.compile(template, options, template_name, start_path)
 	options = initialise_options(options)
-	options.template_name = template_name or 'liluat.compile'
+	template_name = template_name or 'liluat.compile'
 
 	local output_function = "coroutine.yield"
 
@@ -418,7 +417,7 @@ function liluat.compile(template, options, template_name, start_path)
 	end
 
 	return {
-		name = options.template_name,
+		name = template_name,
 		code = table.concat(lua_code, '\n')
 	}
 end

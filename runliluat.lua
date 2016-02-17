@@ -217,7 +217,7 @@ if options_string then
 end
 
 if list_dependencies then
-	local dependencies = liluat.get_dependencies(template, options)
+	local dependencies = liluat.get_dependencies(template, options, path)
 	write_out(table.concat(dependencies, "\n").."\n")
 	os.exit(0)
 end
