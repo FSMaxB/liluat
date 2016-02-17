@@ -1,3 +1,4 @@
+#!/bin/bash
 # A script for setting up environment for travis-ci testing.
 # Sets up Lua and Luarocks.
 # LUA must be "Lua 5.1", "Lua 5.2", "Lua 5.3" or "LuaJIT 2.0".
@@ -31,7 +32,15 @@ else
 		wget -O - http://www.lua.org/ftp/lua-5.3.2.tar.gz | tar xz
 		cd lua-5.3.2;
 	fi
-	make linux
+	if [[ "$OSTYPE" == "linux-gnu" ]]; then
+		make linux
+	elif [[ "$OSTYPE" == "darwin"* ]]; then
+		make macosx
+	elif [[ "$OSTYPE" == "freebsd"* ]]; then
+		make freebsd
+	else
+		make generic
+	fi
 	make install INSTALL_TOP="$HOME/prefix"
 fi
 

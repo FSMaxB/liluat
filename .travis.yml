@@ -1,5 +1,8 @@
 language: c
 sudo: false
+os:
+  - linux
+  - osx
 
 env:
   - LUA='Lua 5.1'
