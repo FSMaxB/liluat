@@ -141,7 +141,7 @@ Compile the template into Lua code that can later be rendered. Returns a compile
 * `template`: The template to compile
 * `options`: A table containing different configuration options, see the [Options](#options) section.
 * `template_name`: A name to identify the template with. This is especially useful to be able to find out where a Lua syntax or runtime error is coming from.
-* `start_path`: Path where the current inclusion should start. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
+* `start_path`: Path to start in as a working directory. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
 
 ### liluat.compile\_file(filename, [options])
 Same as `liluat.compile` but loads the template from a file. `template_name` is set to the filename and `start_path` is set to the path where the file is in. Returns a compiled template.
@@ -160,13 +160,13 @@ Same as `liluat.render` but returns a function that can be run in a coroutine an
 Load a template and return a template string where all the included templates have been inlined.
 * `template`: A template string to be inlined.
 * `options`: A table containing different configuration options, see the [Options](#options) section.
-* `start_path`: Path where the current inclusion should start. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
+* `start_path`: Path to start in as a working directory. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
 
 ### liluat.get\_dependencies(template, [options], [start\_path])
 Get a table containing all of the files that a template includes (also recursively).
 * `template`: The template to examine.
 * `options`: A table containing different configuration options, see the [Options] section.
-* `start_path`: Path where the current inclusion should start. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
+* `start_path`: Path to start in as a working directory. If the `base_path` option is not set, this is the path to which the first inclusion is relative to.
 
 ## Trimming
 An important feature not yet talked about is trimming. In order to be able to write templates that look nice and readable while still keeping the output nice, some kinds of whitespaces need to be trimmed in some cases.
