@@ -180,6 +180,13 @@ describe("runliluat", function ()
 		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version")})
 	end)
 
+	it("should have a rockspec file for the current version", function ()
+		local exit_status, stdout, stderr = execute_with_in_and_output("ls liluat-`./runliluat.lua -v`-*.rockspec")
+		assert.is_truthy(stdout:find("^liluat%-[%w%.]+%-%d+%.rockspec"))
+		assert.equal(0, exit_status)
+		assert.equal("", stderr)
+	end)
+
 	it("should complain when trying to print version, get dependencies and inline", function ()
 		local expected_output = {
 			get_error_code(),
