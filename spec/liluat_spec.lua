@@ -1155,7 +1155,7 @@ coroutine.yield("more text")]]
 
 	describe("version", function ()
 		it("should return the current version number", function ()
-			assert.equal("1.0.1", liluat.version())
+			assert.equal("1.0.2", liluat.version())
 		end)
 	end)
 end)
