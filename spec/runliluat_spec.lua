@@ -236,6 +236,17 @@ describe("runliluat", function ()
 		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --inline")})
 	end)
 
+	it("should complain when trying to load a template from a file and stdin", function ()
+		local expected_output = {
+			get_error_code(),
+			"",
+			"ERROR: Can't both load a template from stdin and a file.\n"
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -t spec/index.html.template --stdin template", "{{}}")})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --template-file spec/index.html.template --stdin template", "{{}}")})
+	end)
+
 	it("should print dependencies", function ()
 		local template = '{{include: "spec/index.html.template"}}'
 		local expected_output = {

@@ -199,6 +199,11 @@ if print_version and inline then
 	print_error("Can't both print the version and inline a template.")
 	os.exit(1)
 end
+
+if template_path and template then
+	print_error("Can't both load a template from stdin and a file.")
+	os.exit(1)
+end
 -----
 
 if print_version then
