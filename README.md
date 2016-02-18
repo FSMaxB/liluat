@@ -64,8 +64,6 @@ You can include other template files like this:
 ```
 {{include: 'file_name'}}
 ```
-Note: This doesn't only accept string literals, but arbitrary Lua expressions. Therefore it's quite simple to e.g. iterate over numbered template files.
-
 Liluat is able to detect cyclic inclusion in most cases (eg. not if you used symlinks to create a cycle in the filesystem).
 
 ### More
