@@ -190,7 +190,7 @@ The trimming can be globally enabled and disabled via the `trim_left` and `trim_
 You can locally override left and right trimming via `+` and `-`, where `+` means, no trimming, and `-` means trimming. For example, the block `{{+ code -}}` will be trimmed right, but not left, no matter what the global trimming settings are.
 
 ### Example
-In this example, `trim_left` and `trim_right` are set to `code`, which is the default.
+In this example, `trim_left` and `trim_right` are set to `"code"`, which is the default.
 
 ```
 	{{for i = 1, 4 do}}
@@ -224,8 +224,8 @@ Output:
 The following options can be passed via the `options` table:
 * `start_tag`: Start tag to be used instead of `{{`
 * `end_tag`: End tag to be used instead of `}}`
-* `trim_right`: one of `"all"`, `"code"`, `expression` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
-* `trim_left`: one of `"all"`, `"code"`, `expression` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
+* `trim_right`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
+* `trim_left`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
 * `base_path`: Path that is used as base path for includes. If `nil` or `false`, all include paths are interpreted relative to the files path itself. Not that this doesn't influence absolute paths.
 
 ## Command line utility
