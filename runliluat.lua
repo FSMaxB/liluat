@@ -216,14 +216,24 @@ if options_string then
 	options = liluat.private.sandbox("return "..options_string, "options")()
 end
 
+-- template to be loaded from a file
+if template_path and (list_dependencies or inline) then
+	local success
+	success, template = pcall(function () return liluat.private.read_entire_file(template_path) end)
+	if not success then
+		print_error(template, "Failed to read template file "..string.format("%q", template_path)..".")
+		os.exit(1)
+	end
+end
+
 if list_dependencies then
-	local dependencies = liluat.get_dependencies(template, options, path)
+	local dependencies = liluat.get_dependencies(template, options, path or template_path)
 	write_out(table.concat(dependencies, "\n").."\n")
 	os.exit(0)
 end
 
 if inline then
-	write_out(liluat.inline(template, options, path))
+	write_out(liluat.inline(template, options, path or template_path))
 	os.exit(0)
 end
 

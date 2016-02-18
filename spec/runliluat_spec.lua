@@ -249,6 +249,20 @@ describe("runliluat", function ()
 		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --stdin template", template)})
 	end)
 
+	it("should get dependencies when loading a template from a file", function ()
+		local template_path = "spec/index.html.template"
+		local expected_output = {
+			0,
+			"spec/content.html.template\n",
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --template-file "..template_path)})
+	end)
+
 	it("should inline a template", function ()
 			local template = liluat.private.read_entire_file("spec/index.html.template")
 			local expected_output = {
@@ -259,6 +273,20 @@ describe("runliluat", function ()
 
 			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template -i", template)})
 			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template --inline", template)})
+	end)
+
+	it("should inline a template when loading it from a file", function ()
+		local template_path = "spec/index.html.template"
+		local expected_output = {
+			0,
+			liluat.private.read_entire_file("spec/index.html.template.inlined"),
+			""
+		}
+
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -i -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -i --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --inline -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --inline --template-file "..template_path)})
 	end)
 
 	it("should accept template paths via --path", function ()
