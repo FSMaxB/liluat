@@ -1,2 +1,4 @@
 .*.swp
+*.rock
 luacov.stats.out
+luacov.report.out
