@@ -337,7 +337,7 @@ function liluat.compile(template, options, template_name, start_path)
 	options = initialise_options(options)
 	template_name = template_name or 'liluat.compile'
 
-	local output_function = "coroutine.yield"
+	local output_function = "__liluat_output_function"
 
 	-- split the template string into chunks
 	local lexed_template = parse(template, options, nil, nil, start_path)
@@ -430,6 +430,8 @@ end
 
 -- @return a coroutine function
 function liluat.render_coroutine(template, environment)
+	environment = merge_tables(environment, {__liluat_output_function = coroutine.yield})
+
 	return sandbox(template.code, template.name, environment)
 end
 
