@@ -337,7 +337,7 @@ function liluat.compile(template, options, template_name, start_path)
 	options = initialise_options(options)
 	template_name = template_name or 'liluat.compile'
 
-	local output_function = "coroutine.yield"
+	local output_function = "__liluat_output_function"
 
 	-- split the template string into chunks
 	local lexed_template = parse(template, options, nil, nil, start_path)
@@ -430,20 +430,24 @@ end
 
 -- @return a coroutine function
 function liluat.render_coroutine(template, environment)
+	environment = merge_tables(environment, {__liluat_output_function = coroutine.yield})
+
 	return sandbox(template.code, template.name, environment)
 end
 
 -- @return string
 function liluat.render(t, env)
 	local result = {}
-	local co = coroutine.create(liluat.render_coroutine(t, env))
-	while coroutine.status(co) ~= 'dead' do
-		local ok, chunk = coroutine.resume(co)
-		if not ok then
-			error(chunk)
-		end
-		table.insert(result, chunk)
-	end
+
+	-- add closure that renders the text into the result table
+	env = merge_tables(env,
+		{__liluat_output_function = function (text)
+			table.insert(result, text) end})
+
+	-- compile and run the lua code
+	local render_function = sandbox(t.code, t.name, env)
+	render_function()
+
 	return table.concat(result)
 end
 

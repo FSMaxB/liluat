@@ -21,7 +21,7 @@
 -- IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local liluat = require("liluat")
+local liluat = loadfile("liluat.lua")()
 
 describe("liluat", function ()
 	it("should return an empty string for empty templates", function ()
@@ -577,10 +577,10 @@ another line]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("a")
+__liluat_output_function("a")
 i = 0
-coroutine.yield( i)
-coroutine.yield("b")]]
+__liluat_output_function( i)
+__liluat_output_function("b")]]
 			}
 
 			assert.same(expected_output, liluat.compile(template))
@@ -591,7 +591,7 @@ coroutine.yield("b")]]
 			local template_name = "my template"
 			local expected_output = {
 				name = "my template",
-				code = 'coroutine.yield("a")'
+				code = '__liluat_output_function("a")'
 			}
 
 			assert.same(expected_output, liluat.compile(template, nil, template_name))
@@ -606,10 +606,10 @@ coroutine.yield("b")]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("a")
+__liluat_output_function("a")
 i = 0
-coroutine.yield( i)
-coroutine.yield("b")]]
+__liluat_output_function( i)
+__liluat_output_function("b")]]
 			}
 
 			assert.same(expected_output, liluat.compile(template, options))
@@ -630,13 +630,13 @@ some text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield( i)
+__liluat_output_function( i)
 end
  -- comment
-coroutine.yield("some text")]]
+__liluat_output_function("some text")]]
 			}
 
 			assert.same(expected_output, liluat.compile(template, options))
@@ -657,17 +657,17 @@ some text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 ")
-coroutine.yield( i)
+__liluat_output_function( i)
 end
-coroutine.yield("\
+__liluat_output_function("\
 ")
  -- comment
-coroutine.yield("\
+__liluat_output_function("\
 some text")]]
 			}
 
@@ -689,15 +689,15 @@ some text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
 ")
 end
  -- comment
-coroutine.yield("some text")]]
+__liluat_output_function("some text")]]
 			}
 
 			assert.same(expected_output, liluat.compile(template, options))
@@ -718,19 +718,19 @@ some text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 ")
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
 ")
 end
-coroutine.yield("\
+__liluat_output_function("\
 ")
  -- comment
-coroutine.yield("\
+__liluat_output_function("\
 some text")]]
 			}
 
@@ -754,17 +754,17 @@ some more text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 \
 ")
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
 ")
 end
-coroutine.yield("\
+__liluat_output_function("\
 some more text")]]
 			}
 
@@ -789,16 +789,16 @@ some more text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
  	")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 ")
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
  ")
 end
-coroutine.yield("\
+__liluat_output_function("\
 some more text")]]
 			}
 
@@ -823,16 +823,16 @@ some more text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 	")
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
 ")
 end
-coroutine.yield("\
+__liluat_output_function("\
 some more text")]]
 			}
 
@@ -857,16 +857,16 @@ some more text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
  	")
 for i = 1, 5 do
-coroutine.yield("\
+__liluat_output_function("\
 	")
-coroutine.yield( i)
-coroutine.yield("\
+__liluat_output_function( i)
+__liluat_output_function("\
  ")
 end
-coroutine.yield("\
+__liluat_output_function("\
 some more text")]]
 			}
 
@@ -900,26 +900,26 @@ more text]]
 			local expected_output = {
 				name = "liluat.compile",
 				code = [[
-coroutine.yield("some text\
+__liluat_output_function("some text\
 ")
-coroutine.yield( 1)
-coroutine.yield( 2)
-coroutine.yield( 3)
-coroutine.yield("\
+__liluat_output_function( 1)
+__liluat_output_function( 2)
+__liluat_output_function( 3)
+__liluat_output_function("\
 ")
-coroutine.yield( 4)
-coroutine.yield( 5)
-coroutine.yield(" \
+__liluat_output_function( 4)
+__liluat_output_function( 5)
+__liluat_output_function(" \
 \
 ")
-coroutine.yield( 6)
-coroutine.yield(" \
+__liluat_output_function( 6)
+__liluat_output_function(" \
 ")
-coroutine.yield( 7)
-coroutine.yield(" \
+__liluat_output_function( 7)
+__liluat_output_function(" \
 ")
-coroutine.yield( 8)
-coroutine.yield("more text")]]
+__liluat_output_function( 8)
+__liluat_output_function("more text")]]
 			}
 
 			assert.same(expected_output, liluat.compile(template, options))
@@ -959,7 +959,7 @@ coroutine.yield("more text")]]
 			local template = "  {{+code}}"
 
 			local expected_output = {
-				code = 'coroutine.yield("  ")\ncode',
+				code = '__liluat_output_function("  ")\ncode',
 				name = "liluat.compile"
 			}
 
@@ -993,7 +993,7 @@ coroutine.yield("more text")]]
 			}
 
 			local expected_output =  {
-				code = 'code\ncoroutine.yield("\\\n")',
+				code = 'code\n__liluat_output_function("\\\n")',
 				name = "liluat.compile"
 			}
 
@@ -1025,7 +1025,7 @@ coroutine.yield("more text")]]
 			}
 
 			local expected_output = {
-				code = 'coroutine.yield("  ")\ncode\ncoroutine.yield("\\\n")',
+				code = '__liluat_output_function("  ")\ncode\n__liluat_output_function("\\\n")',
 				name = "liluat.compile"
 			}
 
