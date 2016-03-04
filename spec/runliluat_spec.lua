@@ -21,7 +21,7 @@
 -- IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local liluat = require("liluat")
+local liluat = loadfile("liluat.lua")()
 
 -- custom exec function that works across lua versions
 local function execute_command(command)

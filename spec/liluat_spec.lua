@@ -21,7 +21,7 @@
 -- IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local liluat = require("liluat")
+local liluat = loadfile("liluat.lua")()
 
 describe("liluat", function ()
 	it("should return an empty string for empty templates", function ()
