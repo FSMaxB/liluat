@@ -5,11 +5,11 @@ os:
   - osx
 
 env:
-  - LUA='Lua 5.1'
-  - LUA='Lua 5.2'
-  - LUA='Lua 5.3'
-  - LUA='LuaJIT 2.0'
-  - LUA='LuaJIT 2.1'
+  - LUA='Lua5.1'
+  - LUA='Lua5.2'
+  - LUA='Lua5.3'
+  - LUA='LuaJIT2.0'
+  - LUA='LuaJIT2.1'
 
 before_install:
   - bash ci/setup.sh
