@@ -392,7 +392,7 @@ function liluat.compile(template, options, template_name, start_path)
 					end
 				elseif chunk.text:find("^\n") then --have to trim a newline
 					if chunk.text:find("^\n.*\n") then --at least two newlines
-						chunk.text = chunk.text:match("^\n(.*\n)%s-$")
+						chunk.text = chunk.text:match("^\n(.*\n)%s-$") or chunk.text:match("^\n(.*)$")
 					elseif chunk.text:find("^\n%s-$") then
 						chunk.text = ""
 					else

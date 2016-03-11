@@ -572,6 +572,22 @@ another line]]
 	end)
 
 	describe("liluat.compile", function ()
+		it("should not crash with two newlines and at least one character between two code blocks", function()
+			local template = liluat.compile([[
+{{}}
+
+x{{}}
+]])
+		end)
+
+		it("should not crash with tabs at the front either", function()
+			local template = liluat.compile([[
+	{{}}
+
+	x{{}}
+]])
+		end)
+
 		it("should compile templates into code", function ()
 			local template = "a{{i = 0}}{{= i}}b"
 			local expected_output = {
