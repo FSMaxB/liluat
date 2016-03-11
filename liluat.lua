@@ -32,7 +32,7 @@ local liluat = {
 
 -- print the current version
 liluat.version = function ()
-	return "1.1.0"
+	return "1.1.1"
 end
 
 -- escape a string for use in lua patterns

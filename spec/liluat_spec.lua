@@ -1171,7 +1171,7 @@ __liluat_output_function("more text")]]
 
 	describe("version", function ()
 		it("should return the current version number", function ()
-			assert.equal("1.1.0", liluat.version())
+			assert.equal("1.1.1", liluat.version())
 		end)
 	end)
 end)
