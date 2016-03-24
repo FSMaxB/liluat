@@ -680,6 +680,39 @@ another line]]
 			local code = "return string and string.find"
 			assert.is_nil(liluat.private.sandbox(code, nil, nil, {})())
 		end)
+
+		it("should handle compile errors and print its surrounding lines", function ()
+			local code = [[
+-- 1
+-- 2
+-- 3
+-- 4
+-- 5
+-- 6
+"a" .. nil
+-- 8
+-- 9
+-- 10
+-- 11
+-- 12
+-- 13]]
+
+			local expected = [[
+Syntax error in sandboxed code "code" in line 7:
+.*
+  4:  %-%- 4
+  5:  %-%- 5
+  6:  %-%- 6
+  7:> "a" .. nil
+  8:  %-%- 8
+  9:  %-%- 9
+ 10:  %-%- 10]]
+
+			local status, error_message = pcall(liluat.private.sandbox, code, "code")
+
+			assert.is_false(status)
+			assert.truthy(error_message:find(expected))
+		end)
 	end)
 
 	describe("liluat.compile", function ()

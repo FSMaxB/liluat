@@ -239,19 +239,36 @@ liluat.private.prepend_line_numbers = prepend_line_numbers
 -- optionally overwrite the whitelis
 local function sandbox(code, name, environment, whitelist)
 	whitelist = whitelist or sandbox_whitelist
+	name = name or 'unknown'
 
 	-- prepare the environment
 	environment = merge_tables(whitelist, environment)
 
 	local func
+	local error_message
 	if setfenv then --Lua 5.1 and compatible
 		if code:byte(1) == 27 then
-			error("Lua bytecode not permitted.")
+			error("Lua bytecode not permitted.", 2)
 		end
-		func = assert(loadstring(code))
-		setfenv(func, environment)
+		func, error_message = loadstring(code)
+		if func then
+			setfenv(func, environment)
+		end
 	else -- Lua 5.2 and later
-		func = assert(load(code, name, 't', environment))
+		func, error_message = load(code, name, 't', environment)
+	end
+
+	-- handle compile error and print pretty error message
+	if not func then
+		local line_number, message = error_message:match(":(%d+):(.*)")
+		-- lines before and after the error
+		local lines = string_lines(code, line_number - 3, line_number + 3)
+		error(
+			'Syntax error in sandboxed code "' .. name .. '" in line ' .. line_number .. ':\n'
+			.. message .. '\n\n'
+			..  prepend_line_numbers(lines, line_number - 3, line_number),
+			2
+		)
 	end
 
 	return func
