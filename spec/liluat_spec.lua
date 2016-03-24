@@ -60,6 +60,115 @@ Hello, &lt;world&gt;!
 		assert.equal(expected_output, liluat.render(tmpl, {user = {name = "<world>"}, escapeHTML = escapeHTML }))
 	end)
 
+	describe("string_lines", function ()
+		it("should return ranges of lines", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n2\n3\n4\n", liluat.private.string_lines(lines, 2, 4))
+		end)
+
+		it("should return ranges of lines until end of string", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n5\n6\n7", liluat.private.string_lines(lines, 5, 7))
+		end)
+
+		it("should work with to large line numbers", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n6\n7", liluat.private.string_lines(lines, 6, 10))
+		end)
+
+		it("should work with negative line numbers", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("1\n2\n", liluat.private.string_lines(lines, -1, 2))
+		end)
+	end)
+
+	describe("prepend_line_numbers", function()
+		it("should prepend line numbers", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers with empty line in front", function()
+			local lines = [[
+
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers with empty line after it", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers and highlight a line", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:> --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2, 3))
+		end)
+
+		it("should prepend line numbers and start with 1", function()
+			local lines = [[
+--1
+--2
+--3
+--4
+]]
+			local expected = [[
+  1:  --1
+  2:  --2
+  3:  --3
+  4:  --4]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines))
+		end)
+	end)
+
 	describe("clone_table", function ()
 		it("should clone a table", function ()
 			local table = {
@@ -570,6 +679,39 @@ another line]]
 		it("should accept custom whitelists", function ()
 			local code = "return string and string.find"
 			assert.is_nil(liluat.private.sandbox(code, nil, nil, {})())
+		end)
+
+		it("should handle compile errors and print its surrounding lines", function ()
+			local code = [[
+-- 1
+-- 2
+-- 3
+-- 4
+-- 5
+-- 6
+"a" .. nil
+-- 8
+-- 9
+-- 10
+-- 11
+-- 12
+-- 13]]
+
+			local expected = [[
+Syntax error in sandboxed code "code" in line 7:
+.*
+  4:  %-%- 4
+  5:  %-%- 5
+  6:  %-%- 6
+  7:> "a" .. nil
+  8:  %-%- 8
+  9:  %-%- 9
+ 10:  %-%- 10]]
+
+			local status, error_message = pcall(liluat.private.sandbox, code, "code")
+
+			assert.is_false(status)
+			assert.truthy(error_message:find(expected))
 		end)
 	end)
 

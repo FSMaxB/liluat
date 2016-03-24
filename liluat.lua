@@ -35,6 +35,26 @@ liluat.version = function ()
 	return "1.1.1"
 end
 
+-- returns a string containing the fist line until the last line
+local function string_lines(lines, first, last)
+	-- allow negative line numbers
+	first = (first >= 1) and first or 1
+
+	local start_position
+	local current_position = 1
+	local line_counter = 1
+	repeat
+		if line_counter == first then
+			start_position = current_position
+		end
+		current_position = lines:find('\n', current_position + 1, true)
+		line_counter = line_counter + 1
+	until (line_counter == (last + 1)) or (not current_position)
+
+	return lines:sub(start_position, current_position)
+end
+liluat.private.string_lines = string_lines
+
 -- escape a string for use in lua patterns
 -- (this simply prepends all non alphanumeric characters with '%'
 local function escape_pattern(text)
@@ -192,25 +212,63 @@ local sandbox_whitelist = {
 	coroutine = coroutine
 }
 
+-- puts line numbers in front of a string and optionally highlights a single line
+local function prepend_line_numbers(lines, first, highlight)
+	first = (first and (first >= 1)) and first or 1
+	lines = lines:gsub("\n$", "") -- make sure the last line isn't empty
+	lines = lines:gsub("^\n", "") -- make sure the first line isn't empty
+
+	local current_line = first + 1
+	return string.format("%3d:  ", first) .. lines:gsub('\n', function ()
+		local highlight_char = '  '
+		if current_line == tonumber(highlight) then
+			highlight_char = '> '
+		end
+
+		local replacement = string.format("\n%3d:%s", current_line, highlight_char)
+		current_line = current_line + 1
+
+		return replacement
+	end)
+end
+liluat.private.prepend_line_numbers = prepend_line_numbers
+
 -- creates a function in a sandbox from a given code,
 -- name of the execution context and an environment
 -- that will be available inside the sandbox,
 -- optionally overwrite the whitelis
 local function sandbox(code, name, environment, whitelist)
 	whitelist = whitelist or sandbox_whitelist
+	name = name or 'unknown'
 
 	-- prepare the environment
 	environment = merge_tables(whitelist, environment)
 
 	local func
+	local error_message
 	if setfenv then --Lua 5.1 and compatible
 		if code:byte(1) == 27 then
-			error("Lua bytecode not permitted.")
+			error("Lua bytecode not permitted.", 2)
 		end
-		func = assert(loadstring(code))
-		setfenv(func, environment)
+		func, error_message = loadstring(code)
+		if func then
+			setfenv(func, environment)
+		end
 	else -- Lua 5.2 and later
-		func = assert(load(code, name, 't', environment))
+		func, error_message = load(code, name, 't', environment)
+	end
+
+	-- handle compile error and print pretty error message
+	if not func then
+		local line_number, message = error_message:match(":(%d+):(.*)")
+		-- lines before and after the error
+		local lines = string_lines(code, line_number - 3, line_number + 3)
+		error(
+			'Syntax error in sandboxed code "' .. name .. '" in line ' .. line_number .. ':\n'
+			.. message .. '\n\n'
+			..  prepend_line_numbers(lines, line_number - 3, line_number),
+			2
+		)
 	end
 
 	return func
