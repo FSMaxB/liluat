@@ -86,6 +86,89 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
+	describe("prepend_line_numbers", function()
+		it("should prepend line numbers", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers with empty line in front", function()
+			local lines = [[
+
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers with empty line after it", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:  --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2))
+		end)
+
+		it("should prepend line numbers and highlight a line", function()
+			local lines = [[
+--2
+--3
+--4
+--5
+]]
+			local expected = [[
+  2:  --2
+  3:> --3
+  4:  --4
+  5:  --5]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines, 2, 3))
+		end)
+
+		it("should prepend line numbers and start with 1", function()
+			local lines = [[
+--1
+--2
+--3
+--4
+]]
+			local expected = [[
+  1:  --1
+  2:  --2
+  3:  --3
+  4:  --4]]
+
+			assert.equal(expected, liluat.private.prepend_line_numbers(lines))
+		end)
+	end)
+
 	describe("clone_table", function ()
 		it("should clone a table", function ()
 			local table = {

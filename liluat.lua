@@ -212,6 +212,27 @@ local sandbox_whitelist = {
 	coroutine = coroutine
 }
 
+-- puts line numbers in front of a string and optionally highlights a single line
+local function prepend_line_numbers(lines, first, highlight)
+	first = (first and (first >= 1)) and first or 1
+	lines = lines:gsub("\n$", "") -- make sure the last line isn't empty
+	lines = lines:gsub("^\n", "") -- make sure the first line isn't empty
+
+	local current_line = first + 1
+	return string.format("%3d:  ", first) .. lines:gsub('\n', function ()
+		local highlight_char = '  '
+		if current_line == tonumber(highlight) then
+			highlight_char = '> '
+		end
+
+		local replacement = string.format("\n%3d:%s", current_line, highlight_char)
+		current_line = current_line + 1
+
+		return replacement
+	end)
+end
+liluat.private.prepend_line_numbers = prepend_line_numbers
+
 -- creates a function in a sandbox from a given code,
 -- name of the execution context and an environment
 -- that will be available inside the sandbox,
