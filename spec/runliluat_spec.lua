@@ -151,7 +151,7 @@ describe("runliluat", function ()
 			get_error_code(), usage_string, "ERROR: No parameter given.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua")})
 	end)
 
 	it("should complain on incorrect parameters", function ()
@@ -159,7 +159,7 @@ describe("runliluat", function ()
 			get_error_code(), usage_string, 'ERROR: Invalid parameter "-a".\n'
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -a")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -a")})
 	end)
 
 	it("should print the help", function ()
@@ -167,8 +167,8 @@ describe("runliluat", function ()
 			0, usage_string, ""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -h")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --help")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -h")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --help")})
 	end)
 
 	it("should print it's version", function ()
@@ -178,12 +178,12 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version")})
 	end)
 
 	it("should have a rockspec file for the current version", function ()
-		local exit_status, stdout, stderr = execute_with_in_and_output("ls liluat-`./runliluat.lua -v`-*.rockspec")
+		local exit_status, stdout, stderr = execute_with_in_and_output("ls liluat-`spec/preload.lua -v`-*.rockspec")
 		assert.is_truthy(stdout:find("^liluat%-[%w%.]+%-%d+%.rockspec"))
 		assert.equal(0, exit_status)
 		assert.equal("", stderr)
@@ -196,14 +196,14 @@ describe("runliluat", function ()
 			"ERROR: Can't print_version, determine dependencies and inline a template at the same time.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -d -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -d -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --dependencies -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --dependencies --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -d --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -d --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --dependencies --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --dependencies -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version --dependencies -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version --dependencies --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v --dependencies --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v --dependencies -i")})
 	end)
 
 	it("should complain when trying to get dependencies and inline", function ()
@@ -213,10 +213,10 @@ describe("runliluat", function ()
 			"ERROR: Can't both determine dependencies and inline a template.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies --inline")})
 	end)
 
 	it("should complain when trying to get dependencies and print the version", function ()
@@ -226,10 +226,10 @@ describe("runliluat", function ()
 			"ERROR: Can't both determine dependencies and print the version.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -v")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --version")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -v")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --version")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d -v")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d --version")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies -v")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies --version")})
 	end)
 
 	it("should complain when trying to print the version and inline", function ()
@@ -239,10 +239,10 @@ describe("runliluat", function ()
 			"ERROR: Can't both print the version and inline a template.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -v --inline")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version -i")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --version --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -v --inline")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version -i")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --version --inline")})
 	end)
 
 	it("should complain when trying to load a template from a file and stdin", function ()
@@ -252,8 +252,8 @@ describe("runliluat", function ()
 			"ERROR: Can't both load a template from stdin and a file.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -t spec/index.html.template --stdin template", "{{}}")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --template-file spec/index.html.template --stdin template", "{{}}")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -t spec/index.html.template --stdin template", "{{}}")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --template-file spec/index.html.template --stdin template", "{{}}")})
 	end)
 
 	it("should print dependencies", function ()
@@ -265,8 +265,8 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --stdin template", template)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --stdin template", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d --stdin template", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies --stdin template", template)})
 	end)
 
 	it("should get dependencies when loading a template from a file", function ()
@@ -277,10 +277,10 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d -t "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies -t "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d --template-file "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --dependencies --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --dependencies --template-file "..template_path)})
 	end)
 
 	it("should inline a template", function ()
@@ -291,8 +291,8 @@ describe("runliluat", function ()
 				""
 			}
 
-			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template -i", template)})
-			assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path 'spec/' --stdin template --inline", template)})
+			assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --path 'spec/' --stdin template -i", template)})
+			assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --path 'spec/' --stdin template --inline", template)})
 	end)
 
 	it("should inline a template when loading it from a file", function ()
@@ -303,10 +303,10 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -i -t "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -i --template-file "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --inline -t "..template_path)})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --inline --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -i -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -i --template-file "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --inline -t "..template_path)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --inline --template-file "..template_path)})
 	end)
 
 	it("should accept template paths via --path", function ()
@@ -318,7 +318,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --path '"..template_path.."' --stdin template ", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --path '"..template_path.."' --stdin template ", template)})
 	end)
 
 	it("should complain when no template is specified", function ()
@@ -328,7 +328,7 @@ describe("runliluat", function ()
 			"ERROR: No template specified.\n"
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -d")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -d")})
 	end)
 
 	it("should not crash when a template name is specified", function ()
@@ -338,8 +338,8 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template -n 'test'", "")})
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --name 'test'", "")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin template -n 'test'", "")})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin template --name 'test'", "")})
 	end)
 
 	it("should load values from a file", function ()
@@ -351,7 +351,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --value-file "..value_path, template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin template --value-file "..value_path, template)})
 	end)
 
 	it("should load values from stdin", function ()
@@ -363,7 +363,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin values -t "..template_path, values)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin values -t "..template_path, values)})
 	end)
 
 	it("should load values from a parameter", function ()
@@ -376,7 +376,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --values '"..values.."'", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin template --values '"..values.."'", template)})
 	end)
 
 	it("should load options from a file", function ()
@@ -390,7 +390,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin template --options-file "..options_path.." --values '"..values.."'", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin template --options-file "..options_path.." --values '"..values.."'", template)})
 	end)
 
 	it("should load options from stdin", function ()
@@ -404,7 +404,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --stdin options -t "..template_path.." --values '"..values.."'", options)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --stdin options -t "..template_path.." --values '"..values.."'", options)})
 	end)
 
 	it("should load options from a parameter", function ()
@@ -418,7 +418,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --options '"..options.."' -t "..template_path.." --stdin values", values)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --options '"..options.."' -t "..template_path.." --stdin values", values)})
 	end)
 
 	it("should load templates from a file", function ()
@@ -431,7 +431,7 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua -t "..template_path.." --stdin values", values)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua -t "..template_path.." --stdin values", values)})
 	end)
 
 	it("should load templates from stdin", function ()
@@ -444,17 +444,17 @@ describe("runliluat", function ()
 			""
 		}
 
-		assert.same(expected_output, {execute_with_in_and_output("./runliluat.lua --value-file "..value_path.." --stdin template", template)})
+		assert.same(expected_output, {execute_with_in_and_output("spec/preload.lua --value-file "..value_path.." --stdin template", template)})
 	end)
 
 	it("should write it's output to a file", function ()
 		local file, filename = tempfile()
 		file:close()
 
-		execute_with_in_and_output("./runliluat.lua -o "..filename.. " -v")
+		execute_with_in_and_output("spec/preload.lua -o "..filename.. " -v")
 		assert.equal(liluat.version().."\n", liluat.private.read_entire_file(filename))
 
-		execute_with_in_and_output("./runliluat.lua --output "..filename.. " -v")
+		execute_with_in_and_output("spec/preload.lua --output "..filename.. " -v")
 		assert.equal(liluat.version().."\n", liluat.private.read_entire_file(filename))
 
 		os.remove(filename)
