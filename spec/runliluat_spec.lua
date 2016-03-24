@@ -21,7 +21,9 @@
 -- IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local liluat = loadfile("liluat.lua")()
+-- preload to make sure that 'require' loads the local liluat and not the globally installed one
+package.loaded["liluat"] = loadfile("liluat.lua")()
+local liluat = require("liluat")
 
 -- custom exec function that works across lua versions
 local function execute_command(command)
