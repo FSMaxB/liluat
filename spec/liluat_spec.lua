@@ -60,6 +60,32 @@ Hello, &lt;world&gt;!
 		assert.equal(expected_output, liluat.render(tmpl, {user = {name = "<world>"}, escapeHTML = escapeHTML }))
 	end)
 
+	describe("string_lines", function ()
+		it("should return ranges of lines", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n2\n3\n4\n", liluat.private.string_lines(lines, 2, 4))
+		end)
+
+		it("should return ranges of lines until end of string", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n5\n6\n7", liluat.private.string_lines(lines, 5, 7))
+		end)
+
+		it("should work with to large line numbers", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("\n6\n7", liluat.private.string_lines(lines, 6, 10))
+		end)
+
+		it("should work with negative line numbers", function ()
+			local lines = "1\n2\n3\n4\n5\n6\n7"
+
+			assert.equal("1\n2\n", liluat.private.string_lines(lines, -1, 2))
+		end)
+	end)
+
 	describe("clone_table", function ()
 		it("should clone a table", function ()
 			local table = {

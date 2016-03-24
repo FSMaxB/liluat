@@ -35,6 +35,26 @@ liluat.version = function ()
 	return "1.1.1"
 end
 
+-- returns a string containing the fist line until the last line
+local function string_lines(lines, first, last)
+	-- allow negative line numbers
+	first = (first >= 1) and first or 1
+
+	local start_position
+	local current_position = 1
+	local line_counter = 1
+	repeat
+		if line_counter == first then
+			start_position = current_position
+		end
+		current_position = lines:find('\n', current_position + 1, true)
+		line_counter = line_counter + 1
+	until (line_counter == (last + 1)) or (not current_position)
+
+	return lines:sub(start_position, current_position)
+end
+liluat.private.string_lines = string_lines
+
 -- escape a string for use in lua patterns
 -- (this simply prepends all non alphanumeric characters with '%'
 local function escape_pattern(text)
