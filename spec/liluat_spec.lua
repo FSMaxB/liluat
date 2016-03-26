@@ -1318,4 +1318,39 @@ __liluat_output_function("more text")]]
 			assert.equal("1.1.2", liluat.version())
 		end)
 	end)
+
+	describe("liluat.render", function ()
+		it("should handle runtime errors and print its surrounding lines", function ()
+			local code = [[
+-- 1
+-- 2
+-- 3
+-- 4
+-- 5
+-- 6
+local test = "a" .. nil
+-- 8
+-- 9
+-- 10
+-- 11
+-- 12
+-- 13]]
+
+			local expected = [[
+Runtime error in sandboxed code "code" in line 7:
+.*
+  4:  %-%- 4
+  5:  %-%- 5
+  6:  %-%- 6
+  7:> local test = "a" .. nil
+  8:  %-%- 8
+  9:  %-%- 9
+ 10:  %-%- 10]]
+
+			local status, error_message = pcall(liluat.render, {name = 'code', code = code})
+
+			assert.is_false(status)
+			assert.truthy(error_message:find(expected))
+		end)
+	end)
 end)

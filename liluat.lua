@@ -504,7 +504,18 @@ function liluat.render(t, env)
 
 	-- compile and run the lua code
 	local render_function = sandbox(t.code, t.name, env)
-	render_function()
+	local status, error_message = pcall(render_function)
+	if not status then
+		local line_number, message = error_message:match(":(%d+):(.*)")
+		-- lines before and after the error
+		local lines = string_lines(t.code, line_number - 3, line_number + 3)
+		error(
+			'Runtime error in sandboxed code "' .. t.name .. '" in line ' .. line_number .. ':\n'
+			.. message .. '\n\n'
+			..  prepend_line_numbers(lines, line_number - 3, line_number),
+			2
+		)
+	end
 
 	return table.concat(result)
 end
