@@ -267,7 +267,7 @@ local function sandbox(code, name, environment, whitelist)
 			'Syntax error in sandboxed code "' .. name .. '" in line ' .. line_number .. ':\n'
 			.. message .. '\n\n'
 			..  prepend_line_numbers(lines, line_number - 3, line_number),
-			2
+			3
 		)
 	end
 
