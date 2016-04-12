@@ -32,7 +32,7 @@ local liluat = {
 
 -- print the current version
 liluat.version = function ()
-	return "1.1.3"
+	return "1.1.4"
 end
 
 -- returns a string containing the fist line until the last line
