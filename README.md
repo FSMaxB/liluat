@@ -238,8 +238,8 @@ The following options can be passed via the `options` table:
 Liluat comes with a command line interface:
 
 ```
-$ runliluat.lua --help
-Usage: runliluat.lua [options]
+$ runliluat --help
+Usage: runliluat [options]
 Options:
 	-h|--help
 		Show this message.

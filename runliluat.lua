@@ -32,7 +32,7 @@ local liluat = require('liluat')
 
 local function print_usage()
 	print([[
-Usage: runliluat.lua [options]
+Usage: runliluat [options]
 Options:
 	-h|--help
 		Show this message.
