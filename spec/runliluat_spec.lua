@@ -87,7 +87,7 @@ local function get_error_code()
 end
 
 local usage_string = [[
-Usage: runliluat.lua [options]
+Usage: runliluat [options]
 Options:
 	-h|--help
 		Show this message.

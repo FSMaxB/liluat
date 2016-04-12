@@ -21,7 +21,7 @@ Liluat is a fork of version 1.0 of [slt2](https://github.com/henix/slt2) by heni
 12. [Contributing](#contributing)
 
 ## OS support
-Lua is developed on GNU/Linux and automatically tested on GNU/Linux and Mac OS X. I have much confidence that it will also work on FreeBSD, other BSDs and on other POSIX compatible systems like e.g. Cygwin.
+Liluat is developed on GNU/Linux and automatically tested on GNU/Linux and Mac OS X. I have much confidence that it will also work on FreeBSD, other BSDs and on other POSIX compatible systems like e.g. Cygwin.
 
 Windows was not tested, but it might work with some limitations:
 * absolute paths in template includes won't be properly detected because they don't start with a `/`
@@ -43,7 +43,9 @@ Lua is available via [luarocks](https://luarocks.org), the following command ins
 ```
 # luarocks install liluat
 ```
-You might need to add `--local` if you don't have admin (root) permissions.
+You might need to add `--local` if you don't have admin (root) privileges.
+
+Alternatively just copy the file `liluat.lua` to your software (this won't install the command line interface though).
 
 ## Basic syntax
 There are three different types of template blocks:
@@ -62,9 +64,11 @@ You can write arbitrary Lua expression that can be converted into a string like 
 ### Includes
 You can include other template files like this:
 ```
-{{include: 'file_name'}}
+{{include: 'templates/file_name'}}
 ```
-Liluat is able to detect cyclic inclusion in most cases (eg. not if you used symlinks to create a cycle in the filesystem).
+By default the include path is either relative to the directory where the template that does the include is in or it is an absolute path starting with a `/`, e.g. `'/tmp/template-dfjCm'`. You can change this behavior using the `base_path` option, see [Options](#options).
+
+Liluat is able to detect cyclic inclusion in most cases (eg. not if you used symlinks to create a cycle in the filesystem). 
 
 ### More
 There is more to the syntax of liluat, but that will be explained later on in the section [Trimming](#trimming).
@@ -186,6 +190,8 @@ The trimming can be globally enabled and disabled via the `trim_left` and `trim_
 * `"code"`: trim only code blocks, this is the default
 * `false`: disable trimming
 
+Include blocks are not trimmed.
+
 ### Local override
 You can locally override left and right trimming via `+` and `-`, where `+` means, no trimming, and `-` means trimming. For example, the block `{{+ code -}}` will be trimmed right, but not left, no matter what the global trimming settings are.
 
@@ -232,8 +238,8 @@ The following options can be passed via the `options` table:
 Liluat comes with a command line interface:
 
 ```
-$ runliluat.lua --help
-Usage: runliluat.lua [options]
+$ runliluat --help
+Usage: runliluat [options]
 Options:
 	-h|--help
 		Show this message.
@@ -268,7 +274,7 @@ Options:
 ```
 
 ## Sandboxing
-All the code in the templates is run in a sandbox. This is achieved by only allowing access to a subset of the Lua standard libaries via a whitelist. If you require additional Lua functions, you have to pass them in manually via the `values` parameter.
+All the code in the templates is run in a sandbox. To achieve this, the code is run with its own global environment, Lua bytecode is forbidden and only a subset of Lua's standard library functions is allowed via a whitelist. If you require additional standard library functions, you have to pass them in manually via the `values` parameter.
 
 The whitelist currently contains the following:
 ```
@@ -295,6 +301,15 @@ coroutine
 ## License
 Liluat is free software licensed under the MIT license:
 
+> liluat - Lightweight Lua Template engine
+>
+> Project page: https://github.com/FSMaxB/liluat
+>
+> liluat is based on slt2 by henix, see https://github.com/henix/slt2
+>
+> Copyright © 2016 Max Bruckner
+> Copyright © 2011-2016 henix
+>
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 >
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
@@ -302,9 +317,9 @@ Liluat is free software licensed under the MIT license:
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Contributing
-If you find a bug or have a suggestion of what could be improved, write an issue on GitHub or write me an email.
+If you find a bug or have a suggestion on what could be improved, write an issue on GitHub or write me an email.
 
-I'll also gladly accept pull requests via GitHub or email if I think that it will benefit the library. Be sure to talk to me first to increase your success rate and prevent possible frustration/misunderstandings.
+I will also gladly accept pull requests via GitHub or email if I think that it will benefit the library. Be sure to talk to me first to increase your success rate and prevent possible frustration/misunderstandings.
 
 ### Coding style
 * use tabs for indentation
