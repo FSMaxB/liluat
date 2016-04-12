@@ -190,7 +190,7 @@ The trimming can be globally enabled and disabled via the `trim_left` and `trim_
 * `"code"`: trim only code blocks, this is the default
 * `false`: disable trimming
 
-Includes blocks are not trimmed.
+Include blocks are not trimmed.
 
 ### Local override
 You can locally override left and right trimming via `+` and `-`, where `+` means, no trimming, and `-` means trimming. For example, the block `{{+ code -}}` will be trimmed right, but not left, no matter what the global trimming settings are.
