@@ -64,9 +64,11 @@ You can write arbitrary Lua expression that can be converted into a string like 
 ### Includes
 You can include other template files like this:
 ```
-{{include: 'file_name'}}
+{{include: 'templates/file_name'}}
 ```
-Liluat is able to detect cyclic inclusion in most cases (eg. not if you used symlinks to create a cycle in the filesystem).
+By default the include path is either relative to the directory where the template that does the include is in or it is an absolute path starting with a `/`, e.g. `'/tmp/template-dfjCm'`. You can change this behavior using the `base_path` option, see [Options](#options).
+
+Liluat is able to detect cyclic inclusion in most cases (eg. not if you used symlinks to create a cycle in the filesystem). 
 
 ### More
 There is more to the syntax of liluat, but that will be explained later on in the section [Trimming](#trimming).
