@@ -43,7 +43,9 @@ Lua is available via [luarocks](https://luarocks.org), the following command ins
 ```
 # luarocks install liluat
 ```
-You might need to add `--local` if you don't have admin (root) permissions.
+You might need to add `--local` if you don't have admin (root) privileges.
+
+Alternatively just copy the file `liluat.lua` to your software (this won't install the command line interface though).
 
 ## Basic syntax
 There are three different types of template blocks:
