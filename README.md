@@ -317,9 +317,9 @@ Liluat is free software licensed under the MIT license:
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Contributing
-If you find a bug or have a suggestion of what could be improved, write an issue on GitHub or write me an email.
+If you find a bug or have a suggestion on what could be improved, write an issue on GitHub or write me an email.
 
-I'll also gladly accept pull requests via GitHub or email if I think that it will benefit the library. Be sure to talk to me first to increase your success rate and prevent possible frustration/misunderstandings.
+I will also gladly accept pull requests via GitHub or email if I think that it will benefit the library. Be sure to talk to me first to increase your success rate and prevent possible frustration/misunderstandings.
 
 ### Coding style
 * use tabs for indentation
