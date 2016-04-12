@@ -274,7 +274,7 @@ Options:
 ```
 
 ## Sandboxing
-All the code in the templates is run in a sandbox. This is achieved by only allowing access to a subset of the Lua standard libaries via a whitelist. If you require additional Lua functions, you have to pass them in manually via the `values` parameter.
+All the code in the templates is run in a sandbox. To achieve this, the code is run with its own global environment, Lua bytecode is forbidden and only a subset of Lua's standard library functions is allowed via a whitelist. If you require additional standard library functions, you have to pass them in manually via the `values` parameter.
 
 The whitelist currently contains the following:
 ```
