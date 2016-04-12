@@ -21,7 +21,7 @@ Liluat is a fork of version 1.0 of [slt2](https://github.com/henix/slt2) by heni
 12. [Contributing](#contributing)
 
 ## OS support
-Lua is developed on GNU/Linux and automatically tested on GNU/Linux and Mac OS X. I have much confidence that it will also work on FreeBSD, other BSDs and on other POSIX compatible systems like e.g. Cygwin.
+Liluat is developed on GNU/Linux and automatically tested on GNU/Linux and Mac OS X. I have much confidence that it will also work on FreeBSD, other BSDs and on other POSIX compatible systems like e.g. Cygwin.
 
 Windows was not tested, but it might work with some limitations:
 * absolute paths in template includes won't be properly detected because they don't start with a `/`
