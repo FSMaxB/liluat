@@ -238,7 +238,7 @@ liluat.private.prepend_line_numbers = prepend_line_numbers
 -- creates a function in a sandbox from a given code,
 -- name of the execution context and an environment
 -- that will be available inside the sandbox,
--- optionally overwrite the whitelis
+-- optionally overwrite the whitelist
 local function sandbox(code, name, environment, whitelist, reference)
 	whitelist = whitelist or sandbox_whitelist
 	name = name or 'unknown'
