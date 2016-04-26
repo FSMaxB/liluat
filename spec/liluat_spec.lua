@@ -1401,5 +1401,29 @@ Runtime error in sandboxed code "code" in line 7:
 			assert.is_false(status)
 			assert.truthy(error_message:find(expected))
 		end)
+
+		it("should accept the 'reference' option", function ()
+			local template = "{{= tostring(table_reference)}}"
+			local parameters = {table_reference = {}}
+
+			local code = liluat.compile(template)
+
+			assert.equal(tostring(parameters.table_reference), liluat.render(code, parameters, {reference = true}))
+		end)
+	end)
+
+	describe("liluat.render_coroutine", function ()
+		it("should accept the 'reference' option", function ()
+			local template = "{{= tostring(table_reference)}}"
+			local parameters = {table_reference = {}}
+
+			local code = liluat.compile(template)
+
+			local thread = coroutine.wrap(liluat.render_coroutine(code, parameters, {reference = true}))
+
+			local rendered_string = thread()
+
+			assert.equal(tostring(parameters.table_reference), rendered_string)
+		end)
 	end)
 end)
