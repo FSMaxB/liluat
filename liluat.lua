@@ -79,14 +79,16 @@ end
 liluat.private.clone_table = clone_table
 
 -- recursively merge two tables, the second one has precedence
-local function merge_tables(a, b)
+-- if 'shallow' is set, the second table isn't copied recursively,
+-- its content is only referenced instead
+local function merge_tables(a, b, shallow)
 	a = a or {}
 	b = b or {}
 
 	local merged = clone_table(a)
 
 	for key, value in pairs(b) do
-		if type(value) == "table" then
+		if (type(value) == "table") and (not shallow) then
 			if a[key] then
 				merged[key] = merge_tables(a[key], value)
 			else
