@@ -1,9 +1,9 @@
 package = "liluat"
-version = "1.1.4-1"
+version = "1.2.0-1"
 
 source = {
   url = "git://github.com/FSMaxB/liluat",
-  tag = "v1.1.4"
+  tag = "v1.2.0"
 }
 
 description = {
