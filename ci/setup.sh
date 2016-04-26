@@ -45,8 +45,8 @@ else
 fi
 
 cd ..
-wget -O - http://luarocks.org/releases/luarocks-2.2.2.tar.gz | tar xz || wget -O - http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz | tar xz
-cd luarocks-2.2.2
+wget -O - http://luarocks.org/releases/luarocks-2.3.0.tar.gz | tar xz || wget -O - http://keplerproject.github.io/luarocks/releases/luarocks-2.3.0.tar.gz | tar xz
+cd luarocks-2.3.0
 
 if [ "$LUA" == "LuaJIT2.0" ]; then
 	./configure --with-lua-include="$HOME/prefix/include/luajit-2.0/" --prefix="$HOME/prefix/";
