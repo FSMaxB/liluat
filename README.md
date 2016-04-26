@@ -17,8 +17,9 @@ Liluat is a fork of version 1.0 of [slt2](https://github.com/henix/slt2) by heni
 8. [Options](#options)
 9. [Command line utility](#command-line-utility)
 10. [Sandboxing](#sandboxing)
-11. [License](#license)
-12. [Contributing](#contributing)
+11. [Caveats](#caveats)
+12. [License](#license)
+13. [Contributing](#contributing)
 
 ## OS support
 Liluat is developed on GNU/Linux and automatically tested on GNU/Linux and Mac OS X. I have much confidence that it will also work on FreeBSD, other BSDs and on other POSIX compatible systems like e.g. Cygwin.
@@ -234,7 +235,7 @@ The following options can be passed via the `options` table:
 * `trim_right`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
 * `trim_left`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
 * `base_path`: Path that is used as base path for includes. If `nil` or `false`, all include paths are interpreted relative to the files path itself. Not that this doesn't influence absolute paths.
-* `reference`: If set to `true`, `liluat.render` will reference the environment in the sandbox instead of recursively copyiing it. This reduces part of the security of the sandbox, because values can now leak out of it. However, this option is useful if you pass in environments that use a lot of memory or contain reference cycles.
+* `reference`: If set to `true`, `liluat.render` will reference the environment in the sandbox instead of recursively copyiing it. This reduces part of the security of the sandbox, because values can now leak out of it. However, this option is useful if you pass in environments that use a lot of memory or contain reference cycles, see [Caveats/Environment is copied](#environment-is-copied).
 
 ## Command line utility
 Liluat comes with a command line interface:
@@ -299,6 +300,18 @@ os.difftime
 os.time
 coroutine
 ```
+
+## Caveats
+This section documents known issues that can arise in certain usage scenarios.
+
+### Environment is copied
+Due to the sandboxing, the entire environment passed into `liluat.render` or `liluat.render_coroutine` is recursively copied. This can have the following consequences (and probably more):
+
+* High memory usage if the environment uses a large amount of memory. Because a copy is created, liluat needs the same amount once again for the copy. This can get even worse when you render multiple templates with a big environment, because Lua's incremental garbage collector might not be fast enough to clean it up right away.
+* Environments that contain reference cycles will trigger an infinite loop that results in a stack overflow.
+* All metatables are removed from the values in the sandbox. This also means that most object oriented modules will break if you add them to the environment.
+
+All those above issues can be fixed by setting the `reference` option to `true`, see [Options](#options). Note though that this will decrease the security of the sandbox, because changes to the environment that happen in the sandbox will leave the sandbox.
 
 ## License
 Liluat is free software licensed under the MIT license:
