@@ -239,6 +239,55 @@ Hello, &lt;world&gt;!
 			assert.same(expected_output, liluat.private.merge_tables(a, b))
 		end)
 
+		it("should merge the second table as reference, if 'reference' parameter is set", function ()
+			local a = {
+				a = 1,
+				b = 2,
+				c = {
+					d = 3,
+					e = {
+						f = 4
+					}
+				},
+				g = {
+					h = 5
+				}
+			}
+
+			local b = {
+				b = 3,
+				x = 5,
+				y = {
+					z = 4
+				},
+				c = {
+					j = 5
+				}
+			}
+
+			local expected_output = {
+			  a = 1,
+			  b = 3,
+			  c = {
+			    j = 5
+			  },
+			  g = {
+			    h = 5
+			  },
+			  x = 5,
+			  y = {
+			    z = 4
+			  }
+			}
+
+			local merged_table = liluat.private.merge_tables(a, b, true)
+
+			assert.same(expected_output, merged_table)
+
+			-- make sure it is actually referenced
+			assert.equal(b.c, merged_table.c)
+		end)
+
 		it("should merge nil tables", function ()
 			local a = {
 				a = 1
@@ -1351,6 +1400,30 @@ Runtime error in sandboxed code "code" in line 7:
 
 			assert.is_false(status)
 			assert.truthy(error_message:find(expected))
+		end)
+
+		it("should accept the 'reference' option", function ()
+			local template = "{{= tostring(table_reference)}}"
+			local parameters = {table_reference = {}}
+
+			local code = liluat.compile(template)
+
+			assert.equal(tostring(parameters.table_reference), liluat.render(code, parameters, {reference = true}))
+		end)
+	end)
+
+	describe("liluat.render_coroutine", function ()
+		it("should accept the 'reference' option", function ()
+			local template = "{{= tostring(table_reference)}}"
+			local parameters = {table_reference = {}}
+
+			local code = liluat.compile(template)
+
+			local thread = coroutine.wrap(liluat.render_coroutine(code, parameters, {reference = true}))
+
+			local rendered_string = thread()
+
+			assert.equal(tostring(parameters.table_reference), rendered_string)
 		end)
 	end)
 end)

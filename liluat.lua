@@ -79,14 +79,16 @@ end
 liluat.private.clone_table = clone_table
 
 -- recursively merge two tables, the second one has precedence
-local function merge_tables(a, b)
+-- if 'shallow' is set, the second table isn't copied recursively,
+-- its content is only referenced instead
+local function merge_tables(a, b, shallow)
 	a = a or {}
 	b = b or {}
 
 	local merged = clone_table(a)
 
 	for key, value in pairs(b) do
-		if type(value) == "table" then
+		if (type(value) == "table") and (not shallow) then
 			if a[key] then
 				merged[key] = merge_tables(a[key], value)
 			else
@@ -237,12 +239,12 @@ liluat.private.prepend_line_numbers = prepend_line_numbers
 -- name of the execution context and an environment
 -- that will be available inside the sandbox,
 -- optionally overwrite the whitelis
-local function sandbox(code, name, environment, whitelist)
+local function sandbox(code, name, environment, whitelist, reference)
 	whitelist = whitelist or sandbox_whitelist
 	name = name or 'unknown'
 
 	-- prepare the environment
-	environment = merge_tables(whitelist, environment)
+	environment = merge_tables(whitelist, environment, reference)
 
 	local func
 	local error_message
@@ -487,23 +489,30 @@ function liluat.compile_file(filename, options)
 end
 
 -- @return a coroutine function
-function liluat.render_coroutine(template, environment)
-	environment = merge_tables(environment, {__liluat_output_function = coroutine.yield})
+function liluat.render_coroutine(template, environment, options)
+	options = initialise_options(options)
+	environment = merge_tables({__liluat_output_function = coroutine.yield}, environment, options.reference)
 
-	return sandbox(template.code, template.name, environment)
+	return sandbox(template.code, template.name, environment, nil, options.reference)
 end
 
 -- @return string
-function liluat.render(t, env)
+function liluat.render(t, env, options)
+	options = initialise_options(options)
+
 	local result = {}
 
 	-- add closure that renders the text into the result table
-	env = merge_tables(env,
-		{__liluat_output_function = function (text)
-			table.insert(result, text) end})
+	env = merge_tables({
+			__liluat_output_function = function (text)
+				table.insert(result, text) end
+			},
+			env,
+			options.reference
+		)
 
 	-- compile and run the lua code
-	local render_function = sandbox(t.code, t.name, env)
+	local render_function = sandbox(t.code, t.name, env, nil, options.reference)
 	local status, error_message = pcall(render_function)
 	if not status then
 		local line_number, message = error_message:match(":(%d+):(.*)")

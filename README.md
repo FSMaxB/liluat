@@ -152,12 +152,13 @@ Same as `liluat.compile` but loads the template from a file. `template_name` is 
 * `filename`: File to load the template from.
 * `options`: A table containing different configuration options, see the [Options](#options) section.
 
-### liluat.render(compiled\_template, [values])
+### liluat.render(compiled\_template, [values], [options])
 Render a compiled template into a string, using the given values. This runs the compiled template in a sandbox with `values` added to it's environment.
 * `compiled_template`: This is the output of `liluat.compile`. Essentially Lua code with some meta data.
 * `values`: A Lua table containing any kind of values. This can even be functions or custom data types from C. These values are accessible inside the template.
+* `options`: A table containing different configuration options, see the [Options](#options) section. NOTE: Most of those options only change the behavior of `liluat.compile`.
 
-### liluat.render\_coroutine(compiled\_template, [values])
+### liluat.render\_coroutine(compiled\_template, [values], [options])
 Same as `liluat.render` but returns a function that can be run in a coroutine and will return one chunk of data at a time (so you can kind of "stream" the template rendering).
 
 ### liluat.inline(template, [options], [start\_path])
@@ -233,6 +234,7 @@ The following options can be passed via the `options` table:
 * `trim_right`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
 * `trim_left`: one of `"all"`, `"code"`, `"expression"` or `false` to disable. Default is `"code"`. See the section [Trimming](#trimming) for more information.
 * `base_path`: Path that is used as base path for includes. If `nil` or `false`, all include paths are interpreted relative to the files path itself. Not that this doesn't influence absolute paths.
+* `reference`: If set to `true`, `liluat.render` will reference the environment in the sandbox instead of recursively copyiing it. This reduces part of the security of the sandbox, because values can now leak out of it. However, this option is useful if you pass in environments that use a lot of memory or contain reference cycles.
 
 ## Command line utility
 Liluat comes with a command line interface:
