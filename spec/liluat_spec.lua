@@ -284,6 +284,29 @@ Hello, &lt;world&gt;!
 			assert.equal(table.a, clone.a)
 			assert.equal(pairs, getmetatable(clone).__pairs)
 		end)
+
+		it("should clone tables with __index and __newindex metamethods", function ()
+			local index = function (table, key, value)
+				return true
+			end
+
+			local newindex = function (table, key, value)
+				rawset(table, key, false)
+			end
+
+			local table = {a = 1}
+			local metatable = {__index = index, __newindex = newindex}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.not_equal(getmetatable(table), getmetatable(clone))
+			assert.is_true(clone.something)
+			clone.bla = 4
+			assert.is_false(clone.bla)
+		end)
 	end)
 
 	describe("merge_tables", function ()

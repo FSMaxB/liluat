@@ -104,7 +104,7 @@ local function bfs_clone(tab)
 			local copied_key = coloring[key]
 			local copied_value = coloring[value]
 			local copied_node = coloring[node]
-			copied_node[copied_key] = copied_value
+			rawset(copied_node, copied_key, copied_value)
 		end
 
 		local metatable = getmetatable(node)
