@@ -224,6 +224,50 @@ Hello, &lt;world&gt;!
 			assert.equal(clone[clone], clone)
 			assert.equal(clone.b, clone)
 		end)
+
+		it("should clone a metatable", function ()
+			local table = {table = true}
+			local metatable = {metatable = true}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.is_true(clone.table)
+			assert.is_table(getmetatable(clone))
+			assert.not_equal(getmetatable(clone), getmetatable(table))
+			assert.is_true(getmetatable(clone).metatable)
+		end)
+
+		it("should clone a table and it's metatables", function ()
+			local a = {test = true}
+			local b = {test = false}
+			setmetatable(a, b)
+			setmetatable(b, a)
+
+			local table = {
+				[4] = 5,
+				a = a,
+				b = b,
+				[a] = a,
+				[b] = a
+			}
+
+			table[table] = table
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.not_equal(table.a, clone.a)
+			assert.not_equal(table.b, clone.b)
+			assert.equal(5, clone[4])
+			assert.not_equal(clone.a, clone.b)
+			assert.equal(clone.a, clone[clone.a])
+			assert.equal(clone.a, clone[clone.b])
+			assert.equal(clone, clone[clone])
+			assert.equal(clone.a, getmetatable(clone.b))
+			assert.equal(clone.b, getmetatable(clone.a))
+		end)
 	end)
 
 	describe("merge_tables", function ()
