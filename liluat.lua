@@ -107,14 +107,14 @@ local function bfs_clone(tab)
 			rawset(copied_node, copied_key, copied_value)
 		end
 
-		local metatable = getmetatable(node)
+		local metatable = debug.getmetatable(node)
 		if metatable then
 			if coloring[metatable] == nil then -- new node
 				coloring[metatable] = {}
 				table.insert(queue, metatable)
 			end
 
-			setmetatable(coloring[node], coloring[metatable])
+			debug.setmetatable(coloring[node], coloring[metatable])
 		end
 	until #queue == 0
 

@@ -307,6 +307,20 @@ Hello, &lt;world&gt;!
 			clone.bla = 4
 			assert.is_false(clone.bla)
 		end)
+
+		it("should clone tables with __metatable in their metatable", function ()
+			local table = {}
+			local metatable = {__metatable = false}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.is_false(getmetatable(clone))
+			assert.not_equal(debug.getmetatable(table), debug.getmetatable(clone))
+			assert.truthy(debug.getmetatable(clone))
+			assert.is_false(debug.getmetatable(clone).__metatable)
+		end)
 	end)
 
 	describe("merge_tables", function ()
