@@ -409,6 +409,25 @@ Hello, &lt;world&gt;!
 			assert.same({a = 1}, liluat.private.merge_tables(a, nil))
 			assert.same({}, liluat.private.merge_tables(nil, nil))
 		end)
+
+		pending("should merge a table with cycles", function ()
+			local table = {a = 1}
+
+			local c = {c = true}
+			local b = {c = c, b = false}
+			local a = {b = b}
+			c.a = a
+
+			local merged = liluat.private.merge_tables(table, a)
+
+			assert.not_equal(a1, merged)
+			assert.not_equal(a2, merged)
+			assert.equal(merged, merged.b.c.a)
+
+		end)
+
+		pending("should join common subtables when merging", function ()
+		end)
 	end)
 
 	describe("escape_pattern", function ()

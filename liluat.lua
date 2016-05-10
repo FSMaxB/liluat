@@ -62,15 +62,16 @@ local function escape_pattern(text)
 end
 liluat.private.escape_pattern = escape_pattern
 
+-- replace pairs with a version that doesn't respect __pairs metamethods
+local function pairs(table)
+	return next, table
+end
+
 -- make a deep copy of a table using breadth first search.
 -- supports cycles
-local function bfs_clone(tab)
+local function bfs_clone(tab, coloring)
 	local queue = {}
-	local coloring = {}
-
-	local function pairs(table)
-		return next, table
-	end
+	local coloring = coloring or {}
 
 	-- color the table
 	coloring[tab] = {}
@@ -125,25 +126,38 @@ liluat.private.bfs_clone = bfs_clone
 -- recursively merge two tables, the second one has precedence
 -- if 'shallow' is set, the second table isn't copied recursively,
 -- its content is only referenced instead
-local function merge_tables(a, b, shallow)
-	a = a or {}
-	b = b or {}
+local function merge_tables(a, b, shallow, merge_coloring)
+	-- TODO find more efficient algorithm to do this
+	if not merge_coloring then
+		a = a or {}
+		b = b or {}
 
-	local merged = bfs_clone(a)
+		local coloring = {}
+		a = bfs_clone(a, coloring)
+		if not shallow then
+			b = bfs_clone(b, coloring)
+		end
+		coloring = nil -- free after use
+
+		merge_coloring = {}
+	end
 
 	for key, value in pairs(b) do
-		if (type(value) == "table") and (not shallow) then
-			if a[key] then
-				merged[key] = merge_tables(a[key], value)
+		if (type(value) == "table") and (not merge_coloring[value]) and (not shallow) then
+			local original = rawget(a, key)
+			if type(original) == "table" then
+				debug.setmetatable(original, debug.getmetatable(value))
+				merge_coloring[value] = true
+				merge_tables(original, value, shallow, merge_coloring)
 			else
-				merged[key] = bfs_clone(value)
+				rawset(a, key, value)
 			end
 		else
-			merged[key] = value
+			rawset(a, key, value)
 		end
 	end
 
-	return merged
+	return a
 end
 liluat.private.merge_tables = merge_tables
 
