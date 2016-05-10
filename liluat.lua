@@ -122,22 +122,6 @@ local function bfs_clone(tab)
 end
 liluat.private.bfs_clone = bfs_clone
 
--- recursively copy a table
-local function clone_table(table)
-	local clone = {}
-
-	for key, value in pairs(table) do
-		if type(value) == "table" then
-			clone[key] = clone_table(value)
-		else
-			clone[key] = value
-		end
-	end
-
-	return clone
-end
-liluat.private.clone_table = clone_table
-
 -- recursively merge two tables, the second one has precedence
 -- if 'shallow' is set, the second table isn't copied recursively,
 -- its content is only referenced instead
@@ -145,14 +129,14 @@ local function merge_tables(a, b, shallow)
 	a = a or {}
 	b = b or {}
 
-	local merged = clone_table(a)
+	local merged = bfs_clone(a)
 
 	for key, value in pairs(b) do
 		if (type(value) == "table") and (not shallow) then
 			if a[key] then
 				merged[key] = merge_tables(a[key], value)
 			else
-				merged[key] = clone_table(value)
+				merged[key] = bfs_clone(value)
 			end
 		else
 			merged[key] = value

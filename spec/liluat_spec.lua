@@ -169,27 +169,6 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
-	describe("clone_table", function ()
-		it("should clone a table", function ()
-			local table = {
-				a = {
-					b = 1,
-					c = {
-						d = 2
-					}
-				},
-				e = 3
-			}
-
-			local clone = liluat.private.clone_table(table)
-
-			assert.same(table, clone)
-			assert.not_equal(table, clone)
-			assert.not_equal(table.a, clone.a)
-			assert.not_equal(table.a.c, clone.a.c)
-		end)
-	end)
-
 	describe("bfs_clone", function ()
 		it("should clone a table", function ()
 			local table = {
