@@ -190,6 +190,42 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
+	describe("bfs_clone", function ()
+		it("should clone a table", function ()
+			local table = {
+				a = {
+					b = 1,
+					c = {
+						d = 2
+					}
+				},
+				e = 3
+			}
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.same(table, clone)
+			assert.not_equal(table, clone)
+			assert.not_equal(table.a, clone.a)
+			assert.not_equal(table.a.c, clone.a.c)
+		end)
+
+		it("should clone a table with cycles", function ()
+			local table = {
+				a = 1
+			}
+			table.b = table
+			table[table] = table
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.equal(clone[clone], clone)
+			assert.equal(clone.b, clone)
+		end)
+	end)
+
 	describe("merge_tables", function ()
 		it("should merge two tables", function ()
 			local a = {

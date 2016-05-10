@@ -62,6 +62,52 @@ local function escape_pattern(text)
 end
 liluat.private.escape_pattern = escape_pattern
 
+-- make a deep copy of a table using breadth first search.
+-- supports cycles
+local function bfs_clone(tab)
+	local queue = {}
+	local coloring = {}
+
+	-- color the table
+	coloring[tab] = {}
+	-- queue up the table
+	table.insert(queue, tab)
+
+	local node = nil
+	repeat
+		node = table.remove(queue, 1)
+
+		for key,value in pairs(node) do
+			if coloring[key] == nil then -- new node
+				if type(key) == "table" then
+					coloring[key] = {}
+					table.insert(queue, key)
+				else
+					coloring[key] = key
+				end
+			end
+
+			if coloring[value] == nil then -- new node
+				if type(value) == "table" then
+					coloring[value] = {}
+					table.insert(queue, value)
+				else
+					coloring[value] = value
+				end
+			end
+
+			-- put key and value in the copy
+			local copied_key = coloring[key]
+			local copied_value = coloring[value]
+			local copied_node = coloring[node]
+			copied_node[copied_key] = copied_value
+		end
+	until #queue == 0
+
+	return coloring[tab]
+end
+liluat.private.bfs_clone = bfs_clone
+
 -- recursively copy a table
 local function clone_table(table)
 	local clone = {}
