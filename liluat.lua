@@ -68,6 +68,10 @@ local function bfs_clone(tab)
 	local queue = {}
 	local coloring = {}
 
+	local function pairs(table)
+		return next, table
+	end
+
 	-- color the table
 	coloring[tab] = {}
 	-- queue up the table

@@ -268,6 +268,22 @@ Hello, &lt;world&gt;!
 			assert.equal(clone.a, getmetatable(clone.b))
 			assert.equal(clone.b, getmetatable(clone.a))
 		end)
+
+		it("should clone tables with __pairs in their metatable", function ()
+			local pairs = function ()
+				return nil
+			end
+
+			local table = {a = 1}
+			local metatable = {__pairs = pairs}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.equal(pairs, getmetatable(clone).__pairs)
+		end)
 	end)
 
 	describe("merge_tables", function ()
