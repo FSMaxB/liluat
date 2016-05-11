@@ -69,57 +69,82 @@ end
 
 -- make a deep copy of a table using breadth first search.
 -- supports cycles
-local function bfs_clone(tab, coloring)
+local function bfs_clone(tab, coloring, parents)
 	local queue = {}
 	local coloring = coloring or {}
 
 	-- color the table
-	coloring[tab] = {}
+	local copied_tab = {}
+	coloring[tab] = copied_tab
+
 	-- queue up the table
 	table.insert(queue, tab)
 
 	local node = nil
 	repeat
 		node = table.remove(queue, 1)
+		local copied_node = coloring[node]
+		local copied_key = nil
+		local copied_value = nil
 
 		for key,value in pairs(node) do
-			if coloring[key] == nil then -- new node
+			copied_key = coloring[key]
+			if copied_key == nil then -- new node
 				if type(key) == "table" then
-					coloring[key] = {}
+					copied_key = {}
 					table.insert(queue, key)
 				else
-					coloring[key] = key
+					copied_key = key
 				end
+
+				coloring[key] = copied_key
+				if parents then
+					parents[copied_key] = {[copied_node] = "key"}
+				end
+			elseif parents then
+				parents[copied_key][copied_node] = "key"
 			end
 
-			if coloring[value] == nil then -- new node
+			copied_value = coloring[value]
+			if copied_value == nil then -- new node
 				if type(value) == "table" then
-					coloring[value] = {}
+					copied_value = {}
 					table.insert(queue, value)
 				else
-					coloring[value] = value
+					copied_value = value
 				end
+
+				coloring[value] = copied_value
+				if parents then
+					parents[copied_value] = {[copied_node] = "key"}
+				end
+			elseif parents then
+				parents[copied_value][copied_node] = "value"
 			end
 
 			-- put key and value in the copy
-			local copied_key = coloring[key]
-			local copied_value = coloring[value]
-			local copied_node = coloring[node]
 			rawset(copied_node, copied_key, copied_value)
 		end
 
 		local metatable = debug.getmetatable(node)
 		if metatable then
-			if coloring[metatable] == nil then -- new node
-				coloring[metatable] = {}
+			local copied_metatable = coloring[metatable]
+			if copied_metatable == nil then -- new node
+				copied_metatable = {}
+				coloring[metatable] = copied_metatable
+				if parents then
+					parents[copied_metatable] = {[copied_node] = "metatable"}
+				end
 				table.insert(queue, metatable)
+			elseif parents then
+				parents[copied_metatable][copied_node] = "metatable"
 			end
 
-			debug.setmetatable(coloring[node], coloring[metatable])
+			debug.setmetatable(copied_node, copied_metatable)
 		end
 	until #queue == 0
 
-	return coloring[tab]
+	return copied_tab
 end
 liluat.private.bfs_clone = bfs_clone
 
