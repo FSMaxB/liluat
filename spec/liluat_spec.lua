@@ -169,7 +169,7 @@ Hello, &lt;world&gt;!
 		end)
 	end)
 
-	describe("clone_table", function ()
+	describe("bfs_clone", function ()
 		it("should clone a table", function ()
 			local table = {
 				a = {
@@ -181,12 +181,124 @@ Hello, &lt;world&gt;!
 				e = 3
 			}
 
-			local clone = liluat.private.clone_table(table)
+			local clone = liluat.private.bfs_clone(table)
 
 			assert.same(table, clone)
 			assert.not_equal(table, clone)
 			assert.not_equal(table.a, clone.a)
 			assert.not_equal(table.a.c, clone.a.c)
+		end)
+
+		it("should clone a table with cycles", function ()
+			local table = {
+				a = 1
+			}
+			table.b = table
+			table[table] = table
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.equal(clone[clone], clone)
+			assert.equal(clone.b, clone)
+		end)
+
+		it("should clone a metatable", function ()
+			local table = {table = true}
+			local metatable = {metatable = true}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.is_true(clone.table)
+			assert.is_table(getmetatable(clone))
+			assert.not_equal(getmetatable(clone), getmetatable(table))
+			assert.is_true(getmetatable(clone).metatable)
+		end)
+
+		it("should clone a table and it's metatables", function ()
+			local a = {test = true}
+			local b = {test = false}
+			setmetatable(a, b)
+			setmetatable(b, a)
+
+			local table = {
+				[4] = 5,
+				a = a,
+				b = b,
+				[a] = a,
+				[b] = a
+			}
+
+			table[table] = table
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.not_equal(table.a, clone.a)
+			assert.not_equal(table.b, clone.b)
+			assert.equal(5, clone[4])
+			assert.not_equal(clone.a, clone.b)
+			assert.equal(clone.a, clone[clone.a])
+			assert.equal(clone.a, clone[clone.b])
+			assert.equal(clone, clone[clone])
+			assert.equal(clone.a, getmetatable(clone.b))
+			assert.equal(clone.b, getmetatable(clone.a))
+		end)
+
+		it("should clone tables with __pairs in their metatable", function ()
+			local pairs = function ()
+				return nil
+			end
+
+			local table = {a = 1}
+			local metatable = {__pairs = pairs}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.equal(pairs, getmetatable(clone).__pairs)
+		end)
+
+		it("should clone tables with __index and __newindex metamethods", function ()
+			local index = function (table, key, value)
+				return true
+			end
+
+			local newindex = function (table, key, value)
+				rawset(table, key, false)
+			end
+
+			local table = {a = 1}
+			local metatable = {__index = index, __newindex = newindex}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.equal(table.a, clone.a)
+			assert.not_equal(getmetatable(table), getmetatable(clone))
+			assert.is_true(clone.something)
+			clone.bla = 4
+			assert.is_false(clone.bla)
+		end)
+
+		it("should clone tables with __metatable in their metatable", function ()
+			local table = {}
+			local metatable = {__metatable = false}
+			setmetatable(table, metatable)
+
+			local clone = liluat.private.bfs_clone(table)
+
+			assert.not_equal(table, clone)
+			assert.is_false(getmetatable(clone))
+			assert.not_equal(debug.getmetatable(table), debug.getmetatable(clone))
+			assert.truthy(debug.getmetatable(clone))
+			assert.is_false(debug.getmetatable(clone).__metatable)
 		end)
 	end)
 
@@ -296,6 +408,25 @@ Hello, &lt;world&gt;!
 			assert.same({a = 1}, liluat.private.merge_tables(nil, a))
 			assert.same({a = 1}, liluat.private.merge_tables(a, nil))
 			assert.same({}, liluat.private.merge_tables(nil, nil))
+		end)
+
+		pending("should merge a table with cycles", function ()
+			local table = {a = 1}
+
+			local c = {c = true}
+			local b = {c = c, b = false}
+			local a = {b = b}
+			c.a = a
+
+			local merged = liluat.private.merge_tables(table, a)
+
+			assert.not_equal(a1, merged)
+			assert.not_equal(a2, merged)
+			assert.equal(merged, merged.b.c.a)
+
+		end)
+
+		pending("should join common subtables when merging", function ()
 		end)
 	end)
 

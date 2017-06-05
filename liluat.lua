@@ -62,44 +62,127 @@ local function escape_pattern(text)
 end
 liluat.private.escape_pattern = escape_pattern
 
--- recursively copy a table
-local function clone_table(table)
-	local clone = {}
-
-	for key, value in pairs(table) do
-		if type(value) == "table" then
-			clone[key] = clone_table(value)
-		else
-			clone[key] = value
-		end
-	end
-
-	return clone
+-- replace pairs with a version that doesn't respect __pairs metamethods
+local function pairs(table)
+	return next, table
 end
-liluat.private.clone_table = clone_table
+
+-- make a deep copy of a table using breadth first search.
+-- supports cycles
+local function bfs_clone(tab, coloring, parents)
+	local queue = {}
+	local coloring = coloring or {}
+
+	-- color the table
+	local copied_tab = {}
+	coloring[tab] = copied_tab
+
+	-- queue up the table
+	table.insert(queue, tab)
+
+	local node = nil
+	repeat
+		node = table.remove(queue, 1)
+		local copied_node = coloring[node]
+		local copied_key = nil
+		local copied_value = nil
+
+		for key,value in pairs(node) do
+			copied_key = coloring[key]
+			if copied_key == nil then -- new node
+				if type(key) == "table" then
+					copied_key = {}
+					table.insert(queue, key)
+				else
+					copied_key = key
+				end
+
+				coloring[key] = copied_key
+				if parents then
+					parents[copied_key] = {[copied_node] = "key"}
+				end
+			elseif parents then
+				parents[copied_key][copied_node] = "key"
+			end
+
+			copied_value = coloring[value]
+			if copied_value == nil then -- new node
+				if type(value) == "table" then
+					copied_value = {}
+					table.insert(queue, value)
+				else
+					copied_value = value
+				end
+
+				coloring[value] = copied_value
+				if parents then
+					parents[copied_value] = {[copied_node] = "key"}
+				end
+			elseif parents then
+				parents[copied_value][copied_node] = "value"
+			end
+
+			-- put key and value in the copy
+			rawset(copied_node, copied_key, copied_value)
+		end
+
+		local metatable = debug.getmetatable(node)
+		if metatable then
+			local copied_metatable = coloring[metatable]
+			if copied_metatable == nil then -- new node
+				copied_metatable = {}
+				coloring[metatable] = copied_metatable
+				if parents then
+					parents[copied_metatable] = {[copied_node] = "metatable"}
+				end
+				table.insert(queue, metatable)
+			elseif parents then
+				parents[copied_metatable][copied_node] = "metatable"
+			end
+
+			debug.setmetatable(copied_node, copied_metatable)
+		end
+	until #queue == 0
+
+	return copied_tab
+end
+liluat.private.bfs_clone = bfs_clone
 
 -- recursively merge two tables, the second one has precedence
 -- if 'shallow' is set, the second table isn't copied recursively,
 -- its content is only referenced instead
-local function merge_tables(a, b, shallow)
-	a = a or {}
-	b = b or {}
+local function merge_tables(a, b, shallow, merge_coloring)
+	-- TODO find more efficient algorithm to do this
+	if not merge_coloring then
+		a = a or {}
+		b = b or {}
 
-	local merged = clone_table(a)
+		local coloring = {}
+		a = bfs_clone(a, coloring)
+		if not shallow then
+			b = bfs_clone(b, coloring)
+		end
+		coloring = nil -- free after use
+
+		merge_coloring = {}
+	end
 
 	for key, value in pairs(b) do
-		if (type(value) == "table") and (not shallow) then
-			if a[key] then
-				merged[key] = merge_tables(a[key], value)
+		if (type(value) == "table") and (not merge_coloring[value]) and (not shallow) then
+			local original = rawget(a, key)
+			if type(original) == "table" then
+				debug.setmetatable(original, debug.getmetatable(value))
+				merge_coloring[value] = true
+				merge_tables(original, value, shallow, merge_coloring)
 			else
-				merged[key] = clone_table(value)
+				rawset(a, key, value)
 			end
 		else
-			merged[key] = value
+			rawset(a, key, value)
 		end
 	end
 
-	return merged
+	return a
 end
 liluat.private.merge_tables = merge_tables
 
