@@ -63,19 +63,21 @@ end
 liluat.private.escape_pattern = escape_pattern
 
 -- recursively copy a table
-local function clone_table(table)
-	local clone = {}
+-- adapted from https://gist.github.com/tylerneylon/81333721109155b2d244, copy3() recursive function
+local function clone_table(obj, seen)
+  -- Handle non-tables and previously-seen tables.
+  if type(obj) ~= 'table' then return obj end
+  if seen and seen[obj] then return seen[obj] end
 
-	for key, value in pairs(table) do
-		if type(value) == "table" then
-			clone[key] = clone_table(value)
-		else
-			clone[key] = value
-		end
-	end
-
-	return clone
+  -- New table; mark it as seen an copy recursively.
+  local s = seen or {}
+  local res = {}
+  s[obj] = res
+  setmetatable(res, clone_table(getmetatable(obj), s))
+  for k, v in pairs(obj) do res[clone_table(k, s)] = clone_table(v, s) end
+  return res
 end
+
 liluat.private.clone_table = clone_table
 
 -- recursively merge two tables, the second one has precedence
