@@ -188,6 +188,31 @@ Hello, &lt;world&gt;!
 			assert.not_equal(table.a, clone.a)
 			assert.not_equal(table.a.c, clone.a.c)
 		end)
+		it("should clone a self-referencing/cyclical table (with metatable)", function ()
+			local table = {
+				a = {
+					b = 1,
+					c = {
+						d = 2
+					}
+				},
+				e = 3
+			}
+			table.f = table
+			table.a.c.g = table.a
+			setmetatable(table, table)
+
+			local clone = liluat.private.clone_table(table)
+
+			assert.same(table, clone)
+			assert.same(getmetatable(table), getmetatable(clone))
+			assert.not_equal(table, clone)
+			assert.not_equal(table.a, clone.a)
+			assert.not_equal(table.a.c, clone.a.c)
+			assert.not_equal(table.f, clone.f)
+			assert.not_equal(table.a.c.g, clone.a.c.g)
+			assert.not_equal(getmetatable(table).a.c.g, getmetatable(clone).a.c.g)
+		end)
 	end)
 
 	describe("merge_tables", function ()
